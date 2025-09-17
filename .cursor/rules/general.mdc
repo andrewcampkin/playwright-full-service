@@ -6,6 +6,16 @@ alwaysApply: true
 
 # General Project Rules & Conventions
 
+## Development Workflow Preferences
+- **User handles commands**: The user prefers to run terminal commands, install dependencies, and manage system operations themselves
+- **AI focuses on code**: The AI should focus on editing code, creating files, and providing guidance
+- **Ask before executing**: The AI should ask the user to run commands like starting Docker, checking services, installing packages, etc.
+- **Provide instructions**: When suggesting commands, provide clear instructions for the user to execute
+- **Ask before giving up**: When something isn't working, ask the user to try solutions (like package restore, rebuilds, etc.) before deleting or removing functionality
+- **Troubleshoot first**: Always attempt to fix issues through proper troubleshooting steps before resorting to removal
+- **Circular development flow**: The AI should automatically test and verify work using Playwright MCP tools without being asked
+- **Self-verification**: Use browser automation to check URLs, test functionality, and validate that changes work as expected
+
 ## Project Overview
 This is a **Playwright as a Service** (SaaS) platform that provides:
 - **Automated site exploration** by AI

@@ -45,7 +45,8 @@ docker-compose logs -f
 ### 4. Access the Applications
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:5000
-- **API Documentation**: http://localhost:5000/swagger
+- **API Documentation (OpenAPI)**: http://localhost:5000/openapi/v1.json
+- **Weather Forecast API**: http://localhost:5000/weatherforecast
 - **pgAdmin** (optional): http://localhost:8080
   - Email: admin@playwrightservice.com
   - Password: admin123
@@ -265,7 +266,8 @@ docker-compose up --build -d
 - Use seed data for development
 
 ### 4. API Testing
-- Use the Swagger UI at http://localhost:5000/swagger
+- Use the OpenAPI specification at http://localhost:5000/openapi/v1.json
+- Test the Weather Forecast endpoint at http://localhost:5000/weatherforecast
 - Use Postman or similar tools for API testing
 - Check the `backend/PlaywrightService/PlaywrightService.http` file for example requests
 
