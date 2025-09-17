@@ -1,0 +1,133 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  name        String?
+  passwordHash String?
+  provider    String?  // 'local', 'google', 'github', etc.
+  providerId  String?  // External provider ID
+  avatar      String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  projects    Project[]
+  testExecutions TestExecution[]
+
+  @@map("users")
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String   @db.VarChar(200)
+  description String?  @db.VarChar(1000)
+  userId      String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  websites   Website[]
+
+  @@map("projects")
+}
+
+model Website {
+  id          String   @id @default(uuid())
+  name        String   @db.VarChar(200)
+  url         String   @db.VarChar(500)
+  description String?  @db.VarChar(1000)
+  projectId   String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  project    Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  testSuites TestSuite[]
+
+  @@map("websites")
+}
+
+model TestSuite {
+  id          String   @id @default(uuid())
+  name        String   @db.VarChar(200)
+  description String?  @db.VarChar(1000)
+  websiteId   String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  website    Website     @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  testCases  TestCase[]
+
+  @@map("test_suites")
+}
+
+model TestCase {
+  id          String   @id @default(uuid())
+  name        String   @db.VarChar(200)
+  description String?  @db.VarChar(1000)
+  steps       String   // JSON serialized test steps
+  testSuiteId String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  testSuite     TestSuite       @relation(fields: [testSuiteId], references: [id], onDelete: Cascade)
+  testExecutions TestExecution[]
+
+  @@map("test_cases")
+}
+
+model TestExecution {
+  id            String    @id @default(uuid())
+  testCaseId    String
+  status        String    @default("Pending") // "Pending", "Running", "Passed", "Failed", "Skipped", "Timeout", "Error"
+  startTime     DateTime
+  endTime       DateTime?
+  errorMessage  String?   @db.VarChar(2000)
+  executionLog  String?   // JSON serialized execution log
+  results       String?   // JSON serialized test results
+  userId        String?   // Who triggered the execution
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  testCase TestCase @relation(fields: [testCaseId], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("test_executions")
+}
+
+// AI Exploration Results - Store the results of AI website exploration
+model ExplorationResult {
+  id            String   @id @default(uuid())
+  websiteId     String
+  url           String   @db.VarChar(500)
+  sitemap       String   // JSON serialized sitemap
+  tests         String   // JSON serialized generated tests
+  explorationData String // JSON serialized exploration data
+  rawResponse   String?  // Raw AI response for debugging
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("exploration_results")
+}

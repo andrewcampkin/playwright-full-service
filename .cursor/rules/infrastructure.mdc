@@ -60,12 +60,12 @@ deployment/
 ### Multi-Stage Builds
 ```dockerfile
 # Development stage
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
-# Build dependencies and application
+FROM node:20-alpine AS development
+# Install dependencies and run development server
 
-# Runtime stage
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
-# Copy only necessary runtime files
+# Production stage
+FROM node:20-alpine AS production
+# Copy built application and run production server
 ```
 
 ### Container Best Practices
@@ -119,7 +119,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 ```yaml
 # .github/workflows/
 ├── frontend-deploy.yml      # Frontend build and deploy
-├── backend-deploy.yml       # Backend build and deploy
+├── backend-node-deploy.yml  # Node.js backend build and deploy
 ├── infrastructure-deploy.yml # Terraform apply
 └── security-scan.yml        # Security scanning
 ```
