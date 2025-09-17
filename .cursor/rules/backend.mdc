@@ -1,110 +1,120 @@
 ---
-description: Backend development rules for .NET 9.0 Web API with PostgreSQL
-globs: ["backend/**/*"]
+description: Backend development rules for Node.js + Express with PostgreSQL and Prisma
+globs: ["backend-node/**/*"]
 alwaysApply: true
 ---
 
 # Backend Development Rules
 
 ## Technology Stack
-- **Framework**: .NET 9.0 Web API
-- **Database**: PostgreSQL with Entity Framework Core
-- **Authentication**: OIDC (OpenID Connect)
-- **API**: RESTful with OpenAPI/Swagger documentation
-- **Architecture**: Clean Architecture with CQRS pattern
+- **Framework**: Node.js 20+ with Express.js
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: JWT with bcrypt password hashing
+- **API**: RESTful with comprehensive error handling
+- **Architecture**: Service-oriented with clean separation of concerns
 
 ## Code Style & Conventions
 
-### C# Coding Standards
-- Use **nullable reference types** enabled (`<Nullable>enable</Nullable>`)
-- Follow **Microsoft C# coding conventions**
-- Use **PascalCase** for public members, classes, methods, properties
-- Use **camelCase** for private fields and local variables
-- Use **async/await** for all I/O operations
-- Prefer **record types** for DTOs and value objects
-- Use **file-scoped namespaces** for all new files
+### JavaScript/TypeScript Standards
+- Use **ES modules** (import/export) for all files
+- Follow **Node.js best practices** and conventions
+- Use **camelCase** for variables, functions, and methods
+- Use **PascalCase** for classes and constructors
+- Use **UPPER_SNAKE_CASE** for constants
+- Use **async/await** for all asynchronous operations
+- Prefer **const** over **let**, avoid **var**
+- Use **TypeScript** for type safety where beneficial
 
 ### Project Structure
 ```
-backend/
-├── PlaywrightService/
-│   ├── Controllers/          # API controllers
-│   ├── Services/            # Business logic services
-│   ├── Models/              # Domain models and DTOs
-│   ├── Data/                # Entity Framework DbContext
-│   ├── Migrations/          # EF migrations
-│   ├── Middleware/          # Custom middleware
-│   ├── Extensions/          # Service registration extensions
-│   └── Configuration/       # App configuration classes
+backend-node/
+├── src/
+│   ├── server.js            # Main application entry point
+│   └── services/            # Business logic services
+│       ├── aiService.js     # AI integration service
+│       ├── authService.js   # Authentication service
+│       └── database.js      # Database service with Prisma
+├── prisma/
+│   ├── schema.prisma        # Database schema
+│   └── seed.js             # Database seeding
+├── Dockerfile.dev          # Development container
+├── package.json            # Dependencies and scripts
+└── .env                    # Environment variables
 ```
 
 ### API Design
-- Use **minimal APIs** for simple endpoints, controllers for complex ones
-- Implement **proper HTTP status codes**
+- Use **Express.js** for RESTful API endpoints
+- Implement **proper HTTP status codes** (200, 201, 400, 401, 403, 404, 500)
 - Use **consistent naming** (kebab-case for URLs)
-- Include **comprehensive OpenAPI documentation**
 - Implement **proper error handling** with structured error responses
-- Use **DTOs** for request/response models, never expose entities directly
+- Use **middleware** for cross-cutting concerns (auth, logging, validation)
+- Separate **public** and **protected** routes clearly
 
-### Database & Entity Framework
-- Use **Entity Framework Core** for data access
-- Create **migrations** for all schema changes
-- Use **repository pattern** or **CQRS** with MediatR
-- Implement **proper indexing** for performance
-- Use **connection pooling** and **proper disposal patterns**
-- Always use **parameterized queries** to prevent SQL injection
+### Database & Prisma
+- Use **Prisma ORM** for type-safe database operations
+- Create **migrations** for all schema changes with `prisma migrate dev`
+- Use **Prisma Client** for all database interactions
+- Implement **proper indexing** in schema.prisma
+- Use **connection pooling** with Prisma
+- Always use **Prisma's built-in SQL injection protection**
 
 ### Authentication & Authorization
-- Implement **OIDC authentication** using Microsoft.AspNetCore.Authentication
-- Use **JWT tokens** for stateless authentication
-- Implement **role-based authorization** where needed
-- Store **secrets securely** using Azure Key Vault or AWS Secrets Manager
+- Implement **JWT authentication** with jsonwebtoken
+- Use **bcryptjs** for password hashing (12+ salt rounds)
+- Implement **middleware-based authorization** for protected routes
+- Store **secrets securely** using environment variables
 - Never hardcode credentials or API keys
+- Use **Bearer token** format in Authorization headers
 
 ### Error Handling & Logging
-- Use **structured logging** with Serilog or built-in ILogger
-- Implement **global exception handling** middleware
+- Use **console.log/error** with structured JSON for logging
+- Implement **global error handling** middleware with Express
 - Log **all important operations** with appropriate levels
-- Use **correlation IDs** for request tracking
+- Use **request IDs** for request tracking
 - Return **meaningful error messages** to clients (avoid exposing internal details)
+- Use **try-catch** blocks for all async operations
 
 ### Performance & Security
-- Implement **request/response caching** where appropriate
+- Implement **request/response caching** with Redis where appropriate
 - Use **async/await** for all I/O operations
-- Implement **rate limiting** for public endpoints
-- Use **HTTPS everywhere**
-- Validate **all input** using Data Annotations or FluentValidation
+- Implement **rate limiting** with express-rate-limit
+- Use **HTTPS everywhere** in production
+- Validate **all input** using express-validator or custom validation
 - Implement **CORS** properly for frontend integration
+- Use **helmet.js** for security headers
 
 ### Testing
-- Write **unit tests** for all business logic
-- Write **integration tests** for API endpoints
-- Use **TestContainers** for database integration tests
+- Write **unit tests** for all business logic with Jest
+- Write **integration tests** for API endpoints with supertest
+- Use **test database** for integration tests
 - Aim for **80%+ code coverage**
-- Use **xUnit** as the testing framework
+- Use **Jest** as the testing framework
+- Mock **external dependencies** appropriately
 
 ### Deployment
-- Create **Dockerfile** for containerization
+- Create **Dockerfile.dev** for development containerization
 - Use **multi-stage builds** for production images
 - Configure **health checks** for container orchestration
-- Use **environment-specific configuration** (appsettings.Production.json)
-- Implement **graceful shutdown** handling
+- Use **environment variables** for configuration
+- Implement **graceful shutdown** handling with process signals
 
 ## Specific to Playwright Service
 
 ### Playwright Integration
-- Use **Playwright for .NET** package for browser automation
-- Implement **proper browser lifecycle management**
+- Use **Playwright for Node.js** package for browser automation
+- Implement **proper browser lifecycle management** with try-finally blocks
 - Use **headless mode** for production environments
 - Handle **browser timeouts** and **navigation failures** gracefully
 - Implement **screenshot capture** and **video recording** capabilities
+- Use **chromium.launch()** with proper options for container environments
 
 ### AI Integration
 - Structure AI prompts for **site exploration** and **test generation**
-- Implement **prompt templates** for consistent AI interactions
+- Implement **OpenAI function calling** with Playwright MCP tools
 - Handle **AI API rate limits** and **timeout scenarios**
 - Cache **AI responses** where appropriate to reduce costs
 - Implement **fallback mechanisms** for AI service failures
+- Use **token-efficient approaches** to avoid context limits
 
 ### Site Analysis Features
 - Implement **sitemap generation** algorithms
@@ -112,11 +122,13 @@ backend/
 - Implement **accessibility scanning** capabilities
 - Generate **performance metrics** from Playwright sessions
 - Create **visual regression testing** infrastructure
+- Store **exploration results** in database for persistence
 
 ## Development Workflow
 1. **Feature branches** from main
 2. **Write tests first** (TDD approach)
 3. **Run linting** and **formatting** before commits
 4. **Update documentation** for new APIs
-5. **Create migrations** for database changes
+5. **Create Prisma migrations** for database changes
 6. **Review PRs** thoroughly before merging
+7. **Use yarn scripts** for common operations (dev, build, test, db:setup)

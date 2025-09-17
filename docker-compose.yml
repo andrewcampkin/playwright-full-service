@@ -15,44 +15,38 @@ services:
     networks:
       - playwright-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U playwright_user -d playwrightservice"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  # Redis for Caching
-  redis:
-    image: redis:7-alpine
-    container_name: playwright-service-redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - playwright-network
-    restart: unless-stopped
-
-  # Backend API (.NET)
-  backend:
+  # Backend API (Node.js) - Current
+  backend-node:
     build:
-      context: ./backend
+      context: ./backend-node
       dockerfile: Dockerfile.dev
-    container_name: playwright-service-backend
+    container_name: playwright-service-backend-node
+    env_file:
+      - .env
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:5000
-      - ConnectionStrings__DefaultConnection=Host=postgres;Database=playwrightservice;Username=playwright_user;Password=playwright_password
-      - Redis__ConnectionString=redis:6379
+      - NODE_ENV=development
+      - PORT=3001
+      - DATABASE_URL=postgresql://playwright_user:playwright_password@postgres:5432/playwrightservice
+      - FRONTEND_URL=http://localhost:3000
+      - PRISMA_QUERY_ENGINE_LIBRARY=/app/node_modules/.prisma/client/libquery_engine-linux-musl-openssl-3.0.x.so.node
     ports:
-      - "5000:5000"
-      - "5001:5001"
+      - "3001:3001"
     volumes:
-      - ./backend:/app
-      - /app/bin
-      - /app/obj
+      - ./backend-node:/app
+      - /app/node_modules
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
     networks:
       - playwright-network
     restart: unless-stopped
-    command: dotnet watch run --urls "http://+:5000"
+    command: sh -c "yarn db:push --accept-data-loss && yarn dev"
 
   # Frontend (React + Vite)
   frontend:
@@ -61,15 +55,15 @@ services:
       dockerfile: Dockerfile.dev
     container_name: playwright-service-frontend
     environment:
-      - VITE_API_URL=http://localhost:5000
-      - VITE_API_BASE_URL=http://localhost:5000/api
+      - VITE_API_URL=http://localhost:3001
+      - VITE_API_BASE_URL=http://localhost:3001/api
     ports:
       - "3000:5173"
     volumes:
       - ./frontend:/app
       - /app/node_modules
     depends_on:
-      - backend
+      - backend-node
     networks:
       - playwright-network
     restart: unless-stopped
@@ -96,7 +90,6 @@ services:
 
 volumes:
   postgres_data:
-  redis_data:
   pgadmin_data:
 
 networks:

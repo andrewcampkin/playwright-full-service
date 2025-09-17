@@ -1,0 +1,40 @@
+FROM node:20-alpine
+
+# Install OpenSSL and other dependencies for Prisma
+RUN apk add --no-cache openssl openssl-dev
+
+# Install Playwright dependencies
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
+
+# Set working directory
+WORKDIR /app
+
+# Install dependencies
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
+
+# Install Playwright browsers
+RUN npx playwright install chromium
+
+# Set environment to use system Chromium
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium
+
+# Copy source code
+COPY . .
+
+# Generate Prisma client
+RUN yarn db:generate
+
+# Expose port
+EXPOSE 3001
+
+# Start development server
+CMD ["yarn", "dev"]

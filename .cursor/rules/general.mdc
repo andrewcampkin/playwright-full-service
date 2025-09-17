@@ -27,11 +27,11 @@ This is a **Playwright as a Service** (SaaS) platform that provides:
 ## Repository Structure
 ```
 playwright-full-service/
-├── backend/                 # .NET 9.0 Web API
+├── backend-node/           # Node.js + Express + Prisma
 ├── frontend/               # React + TypeScript + Vite
 ├── deployment/             # Terraform infrastructure
-├── docs/                   # Project documentation
 ├── scripts/                # Utility and deployment scripts
+├── docker-compose.yml      # Local development environment
 └── .github/                # GitHub Actions workflows
 ```
 
@@ -56,9 +56,9 @@ type(scope): description
 
 **Types**: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 **Examples**:
-- `feat(backend): add OIDC authentication`
+- `feat(backend-node): add JWT authentication`
 - `fix(frontend): resolve test execution timeout`
-- `docs(api): update OpenAPI documentation`
+- `docs(api): update API documentation`
 
 ### Pull Request Process
 1. **Create feature branch** from develop
@@ -178,9 +178,9 @@ type(scope): description
 ## Development Environment
 
 ### Local Setup
-- **Docker Compose** for full-stack local development
+- **Docker Compose** for full-stack local development (PostgreSQL + Redis)
 - **Environment configuration** for different stages
-- **Database seeding** for development data
+- **Database seeding** with Prisma for development data
 - **Hot reload** for both frontend and backend
 - **Debugging tools** and IDE configuration
 - **Code formatting** and linting setup
