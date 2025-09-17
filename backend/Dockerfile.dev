@@ -26,8 +26,9 @@ WORKDIR /app/PlaywrightService
 # Build the project with debug symbols
 RUN dotnet build --configuration Debug
 
-# Install Playwright browsers
+# Install tools
 RUN dotnet tool install --global Microsoft.Playwright.CLI
+RUN dotnet tool install --global dotnet-ef
 ENV PATH="${PATH}:/root/.dotnet/tools"
 RUN playwright install --with-deps
 
