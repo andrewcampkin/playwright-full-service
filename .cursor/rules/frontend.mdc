@@ -1,0 +1,167 @@
+---
+description: Frontend development rules for React + TypeScript + Vite
+globs: ["frontend/**/*"]
+alwaysApply: true
+---
+
+# Frontend Development Rules
+
+## Technology Stack
+- **Framework**: React 19+ with TypeScript
+- **Build Tool**: Vite 7+
+- **Package Manager**: Yarn
+- **Styling**: CSS Modules or styled-components (choose one consistently)
+- **State Management**: React Context or Zustand for complex state
+- **Testing**: Vitest + React Testing Library
+- **Linting**: ESLint with TypeScript rules
+- **Formatting**: Prettier (configure as needed)
+
+## Code Style & Conventions
+
+### TypeScript Standards
+- Use **strict TypeScript** configuration
+- Define **explicit types** for all props, state, and function parameters
+- Use **interface** for object shapes, **type** for unions/primitives
+- Avoid **any** type - use **unknown** or proper typing
+- Use **generics** for reusable components
+- Implement **proper error boundaries** with typed error handling
+
+### React Best Practices
+- Use **functional components** with hooks
+- Prefer **composition over inheritance**
+- Use **React.memo** for performance optimization when needed
+- Implement **proper key props** for list rendering
+- Use **useCallback** and **useMemo** judiciously (profile first)
+- Follow **React 19** patterns and new features
+
+### Component Structure
+```
+src/
+├── components/           # Reusable UI components
+│   ├── ui/              # Basic UI components (Button, Input, etc.)
+│   ├── layout/          # Layout components (Header, Sidebar, etc.)
+│   └── features/        # Feature-specific components
+├── pages/               # Page-level components
+├── hooks/               # Custom React hooks
+├── services/            # API service functions
+├── types/               # TypeScript type definitions
+├── utils/               # Utility functions
+├── constants/           # Application constants
+└── assets/              # Static assets
+```
+
+### Component Guidelines
+- **Single Responsibility**: Each component should have one clear purpose
+- **Props Interface**: Define clear interfaces for all component props
+- **Default Props**: Use default parameters instead of defaultProps
+- **Conditional Rendering**: Use logical operators and ternary operators appropriately
+- **Event Handling**: Use proper TypeScript event types
+
+### State Management
+- Use **React state** for local component state
+- Use **React Context** for shared application state
+- Consider **Zustand** for complex state management needs
+- Implement **proper state updates** (immutable patterns)
+- Use **useReducer** for complex state logic
+
+### API Integration
+- Create **service modules** for API calls
+- Use **fetch API** or **axios** with proper error handling
+- Implement **loading states** and **error boundaries**
+- Use **React Query** or **SWR** for data fetching and caching
+- Handle **authentication tokens** securely
+
+### Styling Guidelines
+- Use **CSS Modules** or **styled-components** consistently
+- Follow **BEM methodology** if using regular CSS
+- Implement **responsive design** with mobile-first approach
+- Use **CSS custom properties** for theming
+- Avoid **inline styles** except for dynamic values
+
+### Performance Optimization
+- Implement **code splitting** with React.lazy()
+- Use **dynamic imports** for route-based splitting
+- Optimize **bundle size** with proper imports
+- Implement **virtual scrolling** for large lists
+- Use **React DevTools Profiler** to identify bottlenecks
+
+### Accessibility (a11y)
+- Use **semantic HTML** elements
+- Implement **proper ARIA attributes**
+- Ensure **keyboard navigation** works correctly
+- Maintain **color contrast** ratios
+- Provide **alt text** for images
+- Use **focus management** for modals and navigation
+
+### Testing Strategy
+- Write **unit tests** for utility functions and hooks
+- Write **integration tests** for component interactions
+- Write **E2E tests** for critical user flows
+- Use **React Testing Library** for component testing
+- Mock **external dependencies** appropriately
+- Aim for **meaningful test coverage**
+
+## Specific to Playwright Service UI
+
+### Dashboard Components
+- Create **reusable dashboard widgets** for metrics display
+- Implement **real-time updates** for test execution status
+- Design **intuitive navigation** for site exploration features
+- Create **responsive data tables** for test results
+
+### Site Exploration Interface
+- Build **interactive site maps** with tree visualization
+- Implement **drag-and-drop** for test organization
+- Create **visual test builders** with form generation
+- Design **progress indicators** for long-running operations
+
+### Test Management
+- Implement **test suite organization** with folders and tags
+- Create **test result visualization** with charts and graphs
+- Build **test execution controls** (run, pause, stop)
+- Design **comparison views** for test result analysis
+
+### User Experience
+- Implement **onboarding flows** for new users
+- Create **help tooltips** and **contextual guidance**
+- Design **error states** with actionable recovery options
+- Build **loading skeletons** for better perceived performance
+
+## Development Workflow
+
+### Package Management
+- Use **yarn** as the package manager
+- Keep **yarn.lock** committed to version control
+- Use **yarn workspaces** if adding multiple packages
+- Regularly update dependencies with `yarn upgrade`
+
+### Build & Development
+- Use `yarn dev` for development server
+- Use `yarn build` for production builds
+- Use `yarn lint` for code quality checks
+- Use `yarn preview` for production preview
+
+### Code Quality
+- Run **ESLint** before commits
+- Use **Prettier** for consistent formatting
+- Implement **pre-commit hooks** with Husky
+- Use **TypeScript strict mode** for type safety
+
+### Environment Configuration
+- Use **environment variables** for configuration
+- Create **separate configs** for development/production
+- Never commit **sensitive data** to version control
+- Use **Vite environment variables** with proper prefixes
+
+## Deployment Considerations
+- Optimize **bundle size** for S3 deployment
+- Configure **proper caching headers**
+- Implement **CDN integration** with CloudFront
+- Use **environment-specific builds** for different stages
+- Implement **error tracking** with services like Sentry
+
+## Browser Support
+- Support **modern browsers** (ES2020+)
+- Test on **Chrome, Firefox, Safari, Edge**
+- Implement **progressive enhancement** for older browsers
+- Use **polyfills** only when necessary

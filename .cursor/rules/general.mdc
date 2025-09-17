@@ -1,0 +1,225 @@
+---
+description: General project rules and conventions for the Playwright as a Service project
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# General Project Rules & Conventions
+
+## Project Overview
+This is a **Playwright as a Service** (SaaS) platform that provides:
+- **Automated site exploration** by AI
+- **Playwright test generation** by AI
+- **Test execution** and management
+- **Automated test result analysis** by AI
+- **Test improvement suggestions** by AI
+
+## Repository Structure
+```
+playwright-full-service/
+├── backend/                 # .NET 9.0 Web API
+├── frontend/               # React + TypeScript + Vite
+├── deployment/             # Terraform infrastructure
+├── docs/                   # Project documentation
+├── scripts/                # Utility and deployment scripts
+└── .github/                # GitHub Actions workflows
+```
+
+## Development Workflow
+
+### Branch Strategy
+- **main**: Production-ready code
+- **develop**: Integration branch for features
+- **feature/***: Feature development branches
+- **hotfix/***: Critical production fixes
+- **release/***: Release preparation branches
+
+### Commit Convention
+Use **Conventional Commits** format:
+```
+type(scope): description
+
+[optional body]
+
+[optional footer(s)]
+```
+
+**Types**: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
+**Examples**:
+- `feat(backend): add OIDC authentication`
+- `fix(frontend): resolve test execution timeout`
+- `docs(api): update OpenAPI documentation`
+
+### Pull Request Process
+1. **Create feature branch** from develop
+2. **Write comprehensive tests** for new features
+3. **Update documentation** as needed
+4. **Ensure all CI checks pass**
+5. **Request code review** from team members
+6. **Address review feedback** before merging
+7. **Squash commits** when merging to maintain clean history
+
+## Code Quality Standards
+
+### General Principles
+- **Write self-documenting code** with clear variable and function names
+- **Keep functions small** and focused on single responsibility
+- **Avoid deep nesting** (max 3-4 levels)
+- **Use meaningful comments** for complex business logic
+- **Follow SOLID principles** for object-oriented design
+- **Implement proper error handling** throughout the application
+
+### Documentation Requirements
+- **README files** for each major component
+- **API documentation** with OpenAPI/Swagger
+- **Code comments** for complex algorithms
+- **Architecture decision records** (ADRs) for significant decisions
+- **Setup instructions** for local development
+- **Deployment guides** for different environments
+
+### Testing Strategy
+- **Unit tests**: Test individual functions and methods
+- **Integration tests**: Test component interactions
+- **E2E tests**: Test complete user workflows
+- **Performance tests**: Test under load conditions
+- **Security tests**: Test for vulnerabilities
+- **Aim for 80%+ code coverage** across the codebase
+
+## Security Guidelines
+
+### Data Protection
+- **Never commit secrets** to version control
+- **Use environment variables** for configuration
+- **Encrypt sensitive data** at rest and in transit
+- **Implement proper authentication** and authorization
+- **Use HTTPS everywhere** in production
+- **Regular security audits** and dependency updates
+
+### API Security
+- **Validate all input** on both client and server
+- **Implement rate limiting** to prevent abuse
+- **Use proper HTTP status codes**
+- **Sanitize error messages** to avoid information leakage
+- **Implement CORS** properly
+- **Use API versioning** for backward compatibility
+
+### Infrastructure Security
+- **Least privilege access** for all AWS resources
+- **Network segmentation** with VPC and security groups
+- **Regular security scanning** in CI/CD pipeline
+- **Secrets management** with AWS Secrets Manager
+- **Audit logging** with CloudTrail
+- **Backup and disaster recovery** procedures
+
+## Performance Guidelines
+
+### Application Performance
+- **Optimize database queries** with proper indexing
+- **Implement caching** where appropriate
+- **Use async/await** for I/O operations
+- **Minimize bundle sizes** for frontend
+- **Implement lazy loading** for large datasets
+- **Monitor performance metrics** in production
+
+### Infrastructure Performance
+- **Auto-scaling** for variable workloads
+- **CDN usage** for static content delivery
+- **Database connection pooling**
+- **Efficient container images** with multi-stage builds
+- **Load balancing** for high availability
+- **Caching strategies** at multiple levels
+
+## Monitoring & Observability
+
+### Application Monitoring
+- **Structured logging** with correlation IDs
+- **Performance metrics** (response times, throughput)
+- **Error tracking** with proper alerting
+- **Business metrics** (user actions, test success rates)
+- **Health checks** for service availability
+- **Custom dashboards** for key metrics
+
+### Infrastructure Monitoring
+- **Resource utilization** monitoring
+- **Cost tracking** and optimization alerts
+- **Security event** monitoring
+- **Backup verification** and testing
+- **Disaster recovery** readiness checks
+- **Compliance monitoring** with AWS Config
+
+## AI Integration Guidelines
+
+### Playwright Service Specific
+- **Prompt engineering** for consistent AI outputs
+- **Error handling** for AI service failures
+- **Cost optimization** for AI API usage
+- **Response validation** for AI-generated content
+- **Fallback mechanisms** when AI services are unavailable
+- **User feedback loops** for AI improvement
+
+### AI Features
+- **Site exploration** with intelligent page discovery
+- **Test generation** with user intent understanding
+- **Test analysis** with failure pattern recognition
+- **Test improvement** with performance optimization suggestions
+- **Accessibility scanning** with AI-powered recommendations
+- **Visual regression detection** with image comparison
+
+## Development Environment
+
+### Local Setup
+- **Docker Compose** for full-stack local development
+- **Environment configuration** for different stages
+- **Database seeding** for development data
+- **Hot reload** for both frontend and backend
+- **Debugging tools** and IDE configuration
+- **Code formatting** and linting setup
+
+### IDE Configuration
+- **EditorConfig** for consistent formatting
+- **ESLint/TSLint** configuration for code quality
+- **Prettier** configuration for code formatting
+- **Debugging configurations** for both stacks
+- **Extension recommendations** for team consistency
+- **Git hooks** for pre-commit validation
+
+## Deployment & Release
+
+### Environment Strategy
+- **Development**: Local development environment
+- **Staging**: Pre-production testing environment
+- **Production**: Live user environment
+- **Feature environments**: For testing specific features
+
+### Release Process
+1. **Feature completion** and testing
+2. **Staging deployment** and validation
+3. **Production deployment** with blue-green strategy
+4. **Monitoring** and rollback procedures
+5. **Post-deployment verification**
+6. **Documentation updates**
+
+### Rollback Procedures
+- **Database migration rollback** procedures
+- **Application version rollback** with container tags
+- **Infrastructure rollback** with Terraform state
+- **Data recovery** procedures for critical failures
+- **Communication plan** for incident response
+
+## Team Collaboration
+
+### Communication
+- **Regular standups** for progress updates
+- **Code review** for knowledge sharing
+- **Documentation** for onboarding new team members
+- **Incident response** procedures and communication
+- **Architecture decisions** documented in ADRs
+- **Retrospectives** for continuous improvement
+
+### Knowledge Sharing
+- **Technical documentation** for complex systems
+- **Runbooks** for operational procedures
+- **Best practices** documentation
+- **Learning resources** for new technologies
+- **Cross-training** on different parts of the system
+- **Mentoring** for junior team members

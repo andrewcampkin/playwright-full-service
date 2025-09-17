@@ -1,0 +1,203 @@
+---
+description: Infrastructure and deployment rules for AWS + Terraform
+globs: ["deployment/**/*", "Dockerfile*", "docker-compose*.yml", "*.tf", "*.tfvars"]
+alwaysApply: true
+---
+
+# Infrastructure & Deployment Rules
+
+## Technology Stack
+- **Infrastructure**: Terraform for AWS resource provisioning
+- **Container Orchestration**: AWS Fargate for backend services
+- **Static Hosting**: AWS S3 + CloudFront for frontend
+- **Database**: Amazon RDS PostgreSQL
+- **CI/CD**: GitHub Actions
+- **Containerization**: Docker with multi-stage builds
+
+## Terraform Guidelines
+
+### Project Structure
+```
+deployment/
+├── environments/
+│   ├── dev/
+│   ├── staging/
+│   └── prod/
+├── modules/
+│   ├── networking/        # VPC, subnets, security groups
+│   ├── database/          # RDS PostgreSQL configuration
+│   ├── compute/           # Fargate services and ECS
+│   ├── storage/           # S3 buckets and CloudFront
+│   └── security/          # IAM roles and policies
+├── shared/               # Common resources (Route 53, etc.)
+└── scripts/              # Deployment and utility scripts
+```
+
+### Terraform Best Practices
+- Use **modules** for reusable infrastructure components
+- Implement **environment-specific configurations**
+- Use **remote state** with S3 backend and DynamoDB locking
+- Apply **resource tagging** consistently across all resources
+- Use **data sources** instead of hardcoded values
+- Implement **variable validation** with proper constraints
+
+### Resource Naming Convention
+- Use **consistent naming**: `{project}-{environment}-{resource-type}-{identifier}`
+- Example: `playwright-service-prod-rds-postgres`
+- Use **kebab-case** for all resource names
+- Include **environment prefixes** (dev, staging, prod)
+
+### Security Best Practices
+- Use **least privilege principle** for IAM roles
+- Implement **VPC endpoints** for private service communication
+- Use **security groups** with minimal required ports
+- Enable **CloudTrail** for audit logging
+- Use **AWS Secrets Manager** for sensitive configuration
+- Implement **network ACLs** for additional security layers
+
+## Docker Configuration
+
+### Multi-Stage Builds
+```dockerfile
+# Development stage
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+# Build dependencies and application
+
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+# Copy only necessary runtime files
+```
+
+### Container Best Practices
+- Use **official base images** with specific versions
+- Implement **non-root user** execution
+- Use **multi-stage builds** to reduce image size
+- Include **health checks** in container definitions
+- Use **distroless images** for production when possible
+- Implement **proper signal handling** for graceful shutdowns
+
+### Docker Compose for Development
+- Create **separate compose files** for different environments
+- Use **named volumes** for database persistence
+- Implement **service dependencies** with proper wait conditions
+- Use **environment files** for configuration
+- Include **development tools** (debugging, hot reload)
+
+## AWS Services Configuration
+
+### Compute (Fargate/ECS)
+- Use **Fargate** for serverless container execution
+- Configure **auto-scaling** based on CPU/memory utilization
+- Implement **health checks** for service monitoring
+- Use **application load balancer** for traffic distribution
+- Configure **service discovery** for inter-service communication
+
+### Database (RDS PostgreSQL)
+- Use **Multi-AZ deployment** for production
+- Enable **automated backups** with proper retention
+- Configure **read replicas** for read-heavy workloads
+- Use **parameter groups** for database tuning
+- Implement **encryption at rest** and in transit
+
+### Storage (S3 + CloudFront)
+- Use **S3** for static website hosting
+- Configure **CloudFront** for global CDN
+- Implement **proper caching policies**
+- Use **S3 bucket policies** for access control
+- Enable **S3 versioning** for backup purposes
+
+### Networking
+- Use **VPC** with public and private subnets
+- Configure **NAT Gateway** for private subnet internet access
+- Implement **Route 53** for DNS management
+- Use **AWS Certificate Manager** for SSL/TLS certificates
+- Configure **WAF** for web application protection
+
+## CI/CD Pipeline (GitHub Actions)
+
+### Pipeline Structure
+```yaml
+# .github/workflows/
+├── frontend-deploy.yml      # Frontend build and deploy
+├── backend-deploy.yml       # Backend build and deploy
+├── infrastructure-deploy.yml # Terraform apply
+└── security-scan.yml        # Security scanning
+```
+
+### Deployment Strategy
+- Use **environment-specific branches** (dev, staging, main)
+- Implement **manual approval** for production deployments
+- Use **blue-green deployment** for zero-downtime updates
+- Implement **rollback procedures** for failed deployments
+- Use **feature flags** for gradual feature rollouts
+
+### Security Scanning
+- Run **SAST** (Static Application Security Testing)
+- Perform **dependency vulnerability scanning**
+- Use **container image scanning**
+- Implement **infrastructure security scanning**
+- Run **secrets scanning** in CI pipeline
+
+## Environment Management
+
+### Environment Isolation
+- Use **separate AWS accounts** or **resource tagging** for environments
+- Implement **environment-specific configurations**
+- Use **separate databases** for each environment
+- Configure **environment-specific monitoring** and alerting
+
+### Configuration Management
+- Use **AWS Systems Manager Parameter Store** for configuration
+- Implement **secrets rotation** for database credentials
+- Use **environment variables** for application configuration
+- Store **non-sensitive config** in version control
+
+### Monitoring & Observability
+- Use **CloudWatch** for metrics and logging
+- Implement **AWS X-Ray** for distributed tracing
+- Configure **alarms** for critical metrics
+- Use **CloudWatch Insights** for log analysis
+- Implement **custom dashboards** for service monitoring
+
+## Cost Optimization
+
+### Resource Optimization
+- Use **Reserved Instances** for predictable workloads
+- Implement **auto-scaling** to match demand
+- Use **Spot Instances** for non-critical workloads
+- Configure **lifecycle policies** for S3 storage
+- Use **AWS Cost Explorer** for cost analysis
+
+### Right-Sizing
+- Monitor **resource utilization** regularly
+- Use **AWS Compute Optimizer** for recommendations
+- Implement **scheduled scaling** for predictable patterns
+- Use **AWS Trusted Advisor** for cost optimization suggestions
+
+## Disaster Recovery
+
+### Backup Strategy
+- Implement **automated database backups**
+- Use **S3 cross-region replication** for critical data
+- Configure **infrastructure as code** for rapid recovery
+- Document **recovery procedures** and RTO/RPO targets
+
+### High Availability
+- Use **Multi-AZ deployment** for critical services
+- Implement **health checks** and **auto-recovery**
+- Use **Route 53 health checks** for DNS failover
+- Configure **cross-region backup** for disaster recovery
+
+## Compliance & Governance
+
+### Resource Tagging
+- Implement **consistent tagging strategy**
+- Use **automated tagging** with policies
+- Include **cost center, environment, owner** tags
+- Use **AWS Config** for compliance monitoring
+
+### Access Control
+- Use **AWS Organizations** for multi-account management
+- Implement **Service Control Policies** (SCPs)
+- Use **AWS IAM Identity Center** for centralized access
+- Configure **cross-account roles** for secure access

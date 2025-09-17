@@ -1,0 +1,22 @@
+# Development Dockerfile for React + Vite
+FROM node:20-alpine AS development
+
+# Set working directory
+WORKDIR /app
+
+# Install dependencies
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
+
+# Copy source code
+COPY . .
+
+# Expose port
+EXPOSE 3000
+
+# Set environment variables
+ENV VITE_API_URL=http://localhost:5000
+ENV VITE_API_BASE_URL=http://localhost:5000/api
+
+# Start development server
+CMD ["yarn", "dev", "--host", "0.0.0.0"]

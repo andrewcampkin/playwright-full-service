@@ -1,0 +1,106 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: playwright-service-postgres
+    environment:
+      POSTGRES_DB: playwrightservice
+      POSTGRES_USER: playwright_user
+      POSTGRES_PASSWORD: playwright_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - playwright-network
+    restart: unless-stopped
+
+  # Redis for Caching
+  redis:
+    image: redis:7-alpine
+    container_name: playwright-service-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - playwright-network
+    restart: unless-stopped
+
+  # Backend API (.NET)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: playwright-service-backend
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=playwrightservice;Username=playwright_user;Password=playwright_password
+      - Redis__ConnectionString=redis:6379
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+    volumes:
+      - ./backend:/app
+      - /app/bin
+      - /app/obj
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - playwright-network
+    restart: unless-stopped
+    command: dotnet watch run --urls "http://+:5000"
+
+  # Frontend (React + Vite)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: playwright-service-frontend
+    environment:
+      - VITE_API_URL=http://localhost:5000
+      - VITE_API_BASE_URL=http://localhost:5000/api
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - playwright-network
+    restart: unless-stopped
+    command: yarn dev --host 0.0.0.0
+
+  # pgAdmin for Database Management (Optional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: playwright-service-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@playwrightservice.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - playwright-network
+    restart: unless-stopped
+    profiles:
+      - tools
+
+volumes:
+  postgres_data:
+  redis_data:
+  pgadmin_data:
+
+networks:
+  playwright-network:
+    driver: bridge

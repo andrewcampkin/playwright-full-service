@@ -1,0 +1,38 @@
+# Development Dockerfile for .NET 9.0 Web API
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS development
+
+# Install Playwright and dependencies
+RUN apt-get update && apt-get install -y \
+    wget \
+    gnupg \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy project file
+COPY PlaywrightService/PlaywrightService.csproj ./PlaywrightService/
+
+# Restore dependencies
+RUN dotnet restore PlaywrightService/PlaywrightService.csproj
+
+# Copy the rest of the application
+COPY PlaywrightService/ ./PlaywrightService/
+
+# Set working directory to the project
+WORKDIR /app/PlaywrightService
+
+# Install Playwright browsers
+RUN dotnet tool install --global Microsoft.Playwright.CLI
+RUN playwright install --with-deps
+
+# Expose ports
+EXPOSE 5000 5001
+
+# Set environment variables for development
+ENV ASPNETCORE_ENVIRONMENT=Development
+ENV ASPNETCORE_URLS=http://+:5000
+
+# Use dotnet watch for hot reload
+CMD ["dotnet", "watch", "run", "--urls", "http://+:5000"]

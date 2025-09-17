@@ -1,0 +1,122 @@
+---
+description: Backend development rules for .NET 9.0 Web API with PostgreSQL
+globs: ["backend/**/*"]
+alwaysApply: true
+---
+
+# Backend Development Rules
+
+## Technology Stack
+- **Framework**: .NET 9.0 Web API
+- **Database**: PostgreSQL with Entity Framework Core
+- **Authentication**: OIDC (OpenID Connect)
+- **API**: RESTful with OpenAPI/Swagger documentation
+- **Architecture**: Clean Architecture with CQRS pattern
+
+## Code Style & Conventions
+
+### C# Coding Standards
+- Use **nullable reference types** enabled (`<Nullable>enable</Nullable>`)
+- Follow **Microsoft C# coding conventions**
+- Use **PascalCase** for public members, classes, methods, properties
+- Use **camelCase** for private fields and local variables
+- Use **async/await** for all I/O operations
+- Prefer **record types** for DTOs and value objects
+- Use **file-scoped namespaces** for all new files
+
+### Project Structure
+```
+backend/
+├── PlaywrightService/
+│   ├── Controllers/          # API controllers
+│   ├── Services/            # Business logic services
+│   ├── Models/              # Domain models and DTOs
+│   ├── Data/                # Entity Framework DbContext
+│   ├── Migrations/          # EF migrations
+│   ├── Middleware/          # Custom middleware
+│   ├── Extensions/          # Service registration extensions
+│   └── Configuration/       # App configuration classes
+```
+
+### API Design
+- Use **minimal APIs** for simple endpoints, controllers for complex ones
+- Implement **proper HTTP status codes**
+- Use **consistent naming** (kebab-case for URLs)
+- Include **comprehensive OpenAPI documentation**
+- Implement **proper error handling** with structured error responses
+- Use **DTOs** for request/response models, never expose entities directly
+
+### Database & Entity Framework
+- Use **Entity Framework Core** for data access
+- Create **migrations** for all schema changes
+- Use **repository pattern** or **CQRS** with MediatR
+- Implement **proper indexing** for performance
+- Use **connection pooling** and **proper disposal patterns**
+- Always use **parameterized queries** to prevent SQL injection
+
+### Authentication & Authorization
+- Implement **OIDC authentication** using Microsoft.AspNetCore.Authentication
+- Use **JWT tokens** for stateless authentication
+- Implement **role-based authorization** where needed
+- Store **secrets securely** using Azure Key Vault or AWS Secrets Manager
+- Never hardcode credentials or API keys
+
+### Error Handling & Logging
+- Use **structured logging** with Serilog or built-in ILogger
+- Implement **global exception handling** middleware
+- Log **all important operations** with appropriate levels
+- Use **correlation IDs** for request tracking
+- Return **meaningful error messages** to clients (avoid exposing internal details)
+
+### Performance & Security
+- Implement **request/response caching** where appropriate
+- Use **async/await** for all I/O operations
+- Implement **rate limiting** for public endpoints
+- Use **HTTPS everywhere**
+- Validate **all input** using Data Annotations or FluentValidation
+- Implement **CORS** properly for frontend integration
+
+### Testing
+- Write **unit tests** for all business logic
+- Write **integration tests** for API endpoints
+- Use **TestContainers** for database integration tests
+- Aim for **80%+ code coverage**
+- Use **xUnit** as the testing framework
+
+### Deployment
+- Create **Dockerfile** for containerization
+- Use **multi-stage builds** for production images
+- Configure **health checks** for container orchestration
+- Use **environment-specific configuration** (appsettings.Production.json)
+- Implement **graceful shutdown** handling
+
+## Specific to Playwright Service
+
+### Playwright Integration
+- Use **Playwright for .NET** package for browser automation
+- Implement **proper browser lifecycle management**
+- Use **headless mode** for production environments
+- Handle **browser timeouts** and **navigation failures** gracefully
+- Implement **screenshot capture** and **video recording** capabilities
+
+### AI Integration
+- Structure AI prompts for **site exploration** and **test generation**
+- Implement **prompt templates** for consistent AI interactions
+- Handle **AI API rate limits** and **timeout scenarios**
+- Cache **AI responses** where appropriate to reduce costs
+- Implement **fallback mechanisms** for AI service failures
+
+### Site Analysis Features
+- Implement **sitemap generation** algorithms
+- Create **page interaction detection** for form identification
+- Implement **accessibility scanning** capabilities
+- Generate **performance metrics** from Playwright sessions
+- Create **visual regression testing** infrastructure
+
+## Development Workflow
+1. **Feature branches** from main
+2. **Write tests first** (TDD approach)
+3. **Run linting** and **formatting** before commits
+4. **Update documentation** for new APIs
+5. **Create migrations** for database changes
+6. **Review PRs** thoroughly before merging
