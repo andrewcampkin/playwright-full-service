@@ -6,6 +6,12 @@ alwaysApply: true
 
 # General Project Rules & Conventions
 
+## Development Workflow Preferences
+- **User handles commands**: The user prefers to run terminal commands, install dependencies, and manage system operations themselves
+- **AI focuses on code**: The AI should focus on editing code, creating files, and providing guidance
+- **Ask before executing**: The AI should ask the user to run commands like starting Docker, checking services, installing packages, etc.
+- **Provide instructions**: When suggesting commands, provide clear instructions for the user to execute
+
 ## Project Overview
 This is a **Playwright as a Service** (SaaS) platform that provides:
 - **Automated site exploration** by AI

@@ -23,8 +23,12 @@ COPY PlaywrightService/ ./PlaywrightService/
 # Set working directory to the project
 WORKDIR /app/PlaywrightService
 
+# Build the project with debug symbols
+RUN dotnet build --configuration Debug
+
 # Install Playwright browsers
 RUN dotnet tool install --global Microsoft.Playwright.CLI
+ENV PATH="${PATH}:/root/.dotnet/tools"
 RUN playwright install --with-deps
 
 # Expose ports

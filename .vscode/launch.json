@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Docker .NET Core Attach",
+        "type": "coreclr",
+        "request": "attach",
+        "processId": "${command:pickProcess}",
+        "pipeTransport": {
+          "pipeProgram": "docker",
+          "pipeArgs": ["exec", "-i", "playwright-service-backend"],
+          "debuggerPath": "/vsdbg/vsdbg",
+          "pipeCwd": "${workspaceFolder}"
+        }
+      }
+    ]
+  }
