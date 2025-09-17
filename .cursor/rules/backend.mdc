@@ -1,9 +1,7 @@
 ---
 description: Backend development rules for Node.js + Express with PostgreSQL and Prisma
-globs: ["backend-node/**/*"]
-alwaysApply: true
+alwaysApply: false
 ---
-
 # Backend Development Rules
 
 ## Technology Stack

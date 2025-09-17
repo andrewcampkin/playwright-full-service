@@ -3,7 +3,7 @@ FROM node:20-alpine
 # Install OpenSSL and other dependencies for Prisma
 RUN apk add --no-cache openssl openssl-dev
 
-# Install Playwright dependencies
+# Install Playwright system dependencies for Alpine
 RUN apk add --no-cache \
     chromium \
     nss \
@@ -11,7 +11,19 @@ RUN apk add --no-cache \
     freetype-dev \
     harfbuzz \
     ca-certificates \
-    ttf-freefont
+    ttf-freefont \
+    libstdc++ \
+    libgcc \
+    libx11 \
+    libxcomposite \
+    libxdamage \
+    libxext \
+    libxfixes \
+    libxrandr \
+    libxtst \
+    libxrender \
+    libxcb \
+    libxkbcommon
 
 # Set working directory
 WORKDIR /app
@@ -20,12 +32,8 @@ WORKDIR /app
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 
-# Install Playwright browsers
+# Install Playwright browsers (without system deps since we installed them manually)
 RUN npx playwright install chromium
-
-# Set environment to use system Chromium
-ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
-ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium
 
 # Copy source code
 COPY . .

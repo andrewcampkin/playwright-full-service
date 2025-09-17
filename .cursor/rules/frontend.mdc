@@ -1,9 +1,7 @@
 ---
 description: Frontend development rules for React + TypeScript + Vite
-globs: ["frontend/**/*"]
-alwaysApply: true
+alwaysApply: false
 ---
-
 # Frontend Development Rules
 
 ## Technology Stack

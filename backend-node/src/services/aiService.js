@@ -29,17 +29,11 @@ export async function crawlAndGenerateTests(url) {
     console.log(`🌐 Starting browser for crawling: ${url}`);
     
     // Launch browser
-    const browserOptions = {
+    browser = await chromium.launch({ 
       headless: true,
+      executablePath: '/usr/bin/chromium-browser',
       args: ['--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
-    };
-    
-    // Use system Chromium if available
-    if (process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH) {
-      browserOptions.executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
-    }
-    
-    browser = await chromium.launch(browserOptions);
+    });
     
     page = await browser.newPage();
     await page.setViewportSize({ width: 1920, height: 1080 });

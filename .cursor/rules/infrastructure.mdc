@@ -1,9 +1,7 @@
 ---
 description: Infrastructure and deployment rules for AWS + Terraform
-globs: ["deployment/**/*", "Dockerfile*", "docker-compose*.yml", "*.tf", "*.tfvars"]
-alwaysApply: true
+alwaysApply: false
 ---
-
 # Infrastructure & Deployment Rules
 
 ## Technology Stack
