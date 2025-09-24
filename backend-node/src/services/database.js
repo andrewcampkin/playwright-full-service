@@ -312,6 +312,339 @@ export class DatabaseService {
     });
   }
 
+  // Execution analytics operations
+  static async getExecutionStats(testSuiteId, testCaseId, userId, limit = 10) {
+    const whereClause = {
+      testCase: {
+        testSuite: {
+          website: {
+            project: { userId, isActive: true },
+          },
+        },
+      },
+      isActive: true,
+    };
+
+    if (testCaseId) {
+      whereClause.testCaseId = testCaseId;
+    }
+
+    if (testSuiteId) {
+      whereClause.testCase.testSuiteId = testSuiteId;
+    }
+
+    return await prisma.testExecution.findMany({
+      where: whereClause,
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      select: {
+        id: true,
+        status: true,
+        startTime: true,
+        endTime: true,
+        errorMessage: true,
+        createdAt: true,
+      },
+    });
+  }
+
+  static async getTestSuiteTestCases(testSuiteId) {
+    return await prisma.testCase.findMany({
+      where: { 
+        testSuiteId,
+        isActive: true,
+      },
+      include: {
+        testSuite: {
+          include: {
+            website: {
+              include: {
+                project: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
+  static async getTestSuitesByUser(userId) {
+    return await prisma.testSuite.findMany({
+      where: { 
+        website: {
+          project: { userId, isActive: true },
+        },
+        isActive: true,
+      },
+      include: {
+        website: {
+          include: {
+            project: true,
+          },
+        },
+        testCases: {
+          where: { isActive: true },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  static async getTestSuitesByWebsite(websiteId) {
+    return await prisma.testSuite.findMany({
+      where: { 
+        websiteId,
+        isActive: true,
+      },
+      include: {
+        website: {
+          include: {
+            project: true,
+          },
+        },
+        testCases: {
+          where: { isActive: true },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  static async getExecutionById(executionId) {
+    return await prisma.testExecution.findUnique({
+      where: { id: executionId },
+      include: {
+        testCase: {
+          include: {
+            testSuite: {
+              include: {
+                website: {
+                  include: {
+                    project: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        user: true,
+      },
+    });
+  }
+
+  static async getLatestExecutionForTestCase(testCaseId) {
+    return await prisma.testExecution.findFirst({
+      where: { 
+        testCaseId,
+        status: 'Running'
+      },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        testCase: true,
+        user: true,
+      },
+    });
+  }
+
+  // Test Execution operations - Get executions
+  static async getExecutionsByTestCase(testCaseId, userId) {
+    return await prisma.testExecution.findMany({
+      where: { 
+        testCaseId,
+        testCase: {
+          testSuite: {
+            website: {
+              project: { userId, isActive: true },
+            },
+          },
+        },
+        isActive: true,
+      },
+      include: {
+        testCase: {
+          include: {
+            testSuite: {
+              include: {
+                website: {
+                  include: {
+                    project: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        user: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  static async getExecutionsByTestSuite(testSuiteId, userId) {
+    return await prisma.testExecution.findMany({
+      where: { 
+        testCase: {
+          testSuiteId,
+          testSuite: {
+            website: {
+              project: { userId, isActive: true },
+            },
+          },
+        },
+        isActive: true,
+      },
+      include: {
+        testCase: {
+          include: {
+            testSuite: {
+              include: {
+                website: {
+                  include: {
+                    project: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        user: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  static async getExecutionsByUser(userId) {
+    return await prisma.testExecution.findMany({
+      where: { 
+        testCase: {
+          testSuite: {
+            website: {
+              project: { userId, isActive: true },
+            },
+          },
+        },
+        isActive: true,
+      },
+      include: {
+        testCase: {
+          include: {
+            testSuite: {
+              include: {
+                website: {
+                  include: {
+                    project: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        user: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  // Test Results and Analytics
+  static async getTestResults(testSuiteId, period, userId) {
+    const whereClause = {
+      testCase: {
+        testSuite: {
+          website: {
+            project: { userId, isActive: true },
+          },
+        },
+      },
+      isActive: true,
+    };
+
+    if (testSuiteId) {
+      whereClause.testCase.testSuiteId = testSuiteId;
+    }
+
+    if (period) {
+      const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
+      whereClause.createdAt = {
+        gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000),
+      };
+    }
+
+    return await prisma.testExecution.findMany({
+      where: whereClause,
+      include: {
+        testCase: {
+          include: {
+            testSuite: {
+              include: {
+                website: {
+                  include: {
+                    project: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        user: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  static async getTestTrends(testSuiteId, period, userId) {
+    const whereClause = {
+      testCase: {
+        testSuite: {
+          website: {
+            project: { userId, isActive: true },
+          },
+        },
+      },
+      isActive: true,
+    };
+
+    if (testSuiteId) {
+      whereClause.testCase.testSuiteId = testSuiteId;
+    }
+
+    if (period) {
+      const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
+      whereClause.createdAt = {
+        gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000),
+      };
+    }
+
+    // Group by date and status
+    const executions = await prisma.testExecution.findMany({
+      where: whereClause,
+      select: {
+        status: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    // Process into trends data
+    const trends = {};
+    executions.forEach(execution => {
+      const date = execution.createdAt.toISOString().split('T')[0];
+      if (!trends[date]) {
+        trends[date] = { date, passed: 0, failed: 0, total: 0 };
+      }
+      trends[date].total++;
+      if (execution.status === 'Passed') {
+        trends[date].passed++;
+      } else if (execution.status === 'Failed' || execution.status === 'Error') {
+        trends[date].failed++;
+      }
+    });
+
+    return Object.values(trends);
+  }
+
   // Utility operations
   static async checkUserAccess(userId, resourceType, resourceId) {
     switch (resourceType) {

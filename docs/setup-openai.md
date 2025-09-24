@@ -1,5 +1,7 @@
 # OpenAI API Key Setup
 
+> **Step-by-step guide to configure OpenAI API access for AI-powered test generation.**
+
 ## Quick Setup
 
 1. **Get your OpenAI API key:**

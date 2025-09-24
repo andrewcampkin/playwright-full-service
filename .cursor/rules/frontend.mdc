@@ -54,6 +54,7 @@ src/
 - **Default Props**: Use default parameters instead of defaultProps
 - **Conditional Rendering**: Use logical operators and ternary operators appropriately
 - **Event Handling**: Use proper TypeScript event types
+- **Avoid Over-Labeling**: Don't add unnecessary text labels, headers, or descriptions that don't serve a functional purpose. Users can see what components do - avoid redundant "Dashboard", "Settings", "User Profile" labels unless they provide actual value
 
 ### State Management
 - Use **React state** for local component state
