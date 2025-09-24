@@ -1,0 +1,121 @@
+name: Terraform Infrastructure
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'deployment/terraform/**'
+      - '.github/workflows/terraform.yml'
+
+env:
+  AWS_REGION: us-east-1
+  TF_VERSION: 1.6.0
+
+jobs:
+  terraform-plan:
+    name: Terraform Plan
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        environment: [prod]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+
+    - name: Terraform Format Check
+      working-directory: ./deployment/terraform
+      run: terraform fmt -check -recursive
+
+    - name: Terraform Init
+      working-directory: ./deployment/terraform
+      run: |
+        terraform init \
+          -backend-config="bucket=${{ secrets.TERRAFORM_STATE_BUCKET }}" \
+          -backend-config="key=playwright-service/${{ matrix.environment }}/terraform.tfstate" \
+          -backend-config="region=${{ env.AWS_REGION }}"
+
+    - name: Terraform Validate
+      working-directory: ./deployment/terraform
+      run: terraform validate
+
+    - name: Terraform Plan
+      working-directory: ./deployment/terraform
+      run: |
+        terraform plan \
+          -var="environment=${{ matrix.environment }}" \
+          -var="domain_name=${{ secrets.DOMAIN_NAME }}" \
+          -var="certificate_arn=${{ secrets.CERTIFICATE_ARN }}" \
+          -out=tfplan-${{ matrix.environment }}
+
+    - name: Upload Terraform Plan
+      uses: actions/upload-artifact@v4
+      with:
+        name: terraform-plan-${{ matrix.environment }}
+        path: deployment/terraform/tfplan-${{ matrix.environment }}
+
+  terraform-apply:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    needs: terraform-plan
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    strategy:
+      matrix:
+        environment: [prod]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+
+    - name: Download Terraform Plan
+      uses: actions/download-artifact@v4
+      with:
+        name: terraform-plan-${{ matrix.environment }}
+        path: deployment/terraform/
+
+    - name: Terraform Init
+      working-directory: ./deployment/terraform
+      run: |
+        terraform init \
+          -backend-config="bucket=${{ secrets.TERRAFORM_STATE_BUCKET }}" \
+          -backend-config="key=playwright-service/${{ matrix.environment }}/terraform.tfstate" \
+          -backend-config="region=${{ env.AWS_REGION }}"
+
+    - name: Terraform Apply
+      working-directory: ./deployment/terraform
+      run: terraform apply -auto-approve tfplan-${{ matrix.environment }}
+
+    - name: Output Infrastructure Info
+      working-directory: ./deployment/terraform
+      run: |
+        echo "## Infrastructure Deployed for ${{ matrix.environment }}" >> $GITHUB_STEP_SUMMARY
+        echo "### Backend API URL" >> $GITHUB_STEP_SUMMARY
+        terraform output -raw alb_dns_name >> $GITHUB_STEP_SUMMARY
+        echo "### Frontend URL" >> $GITHUB_STEP_SUMMARY
+        terraform output -raw cloudfront_domain_name >> $GITHUB_STEP_SUMMARY

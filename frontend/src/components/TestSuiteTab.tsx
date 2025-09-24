@@ -77,15 +77,24 @@ export default function TestSuiteTab() {
 
   const fetchTestSuites = async () => {
     setIsLoading(true);
+    setError(null); // Clear any previous errors
     try {
       const response = await fetch('http://localhost:3001/api/protected/test-suites', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`
         }
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
       const data = await response.json();
-      if (data.success) {
-        setTestSuites(data.data);
+      // Always set testSuites to an array (empty if no data)
+      setTestSuites(data.data || []);
+      // Only set error if there was an actual failure, not just empty results
+      if (!data.success && data.error) {
+        setError(data.error);
       }
     } catch (error) {
       console.error('Error fetching test suites:', error);
@@ -291,9 +300,15 @@ export default function TestSuiteTab() {
 
   return (
     <div className="space-y-6">
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          {error}
+      {error && !isLoading && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded flex items-center justify-between">
+          <span>{error}</span>
+          <button
+            onClick={fetchTestSuites}
+            className="ml-4 text-red-600 hover:text-red-800 underline text-sm"
+          >
+            Retry
+          </button>
         </div>
       )}
 

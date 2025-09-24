@@ -149,76 +149,109 @@ export default function AuthenticatedDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex">
       {/* Sidebar Navigation */}
-      <div className="w-64 bg-white shadow-sm border-r border-gray-200 flex flex-col pt-4">
+      <div className="w-72 glass-card border-r border-white/30 flex flex-col">
+
         {/* Navigation Menu */}
-        <nav className="flex-1 p-4">
-          <ul className="space-y-2">
+        <nav className="flex-1 p-6">
+          <ul className="space-y-3">
             <li>
               <button
                 onClick={() => setActiveTab('generate')}
-                className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                className={`w-full flex items-center space-x-4 px-4 py-3 rounded-xl text-left transition-all duration-300 group ${
                   activeTab === 'generate'
-                    ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                    : 'text-gray-700 hover:bg-gray-50'
+                    ? 'bg-gradient-to-r from-primary-500/10 to-accent-500/10 text-primary-700 border border-primary-200/50 shadow-glow'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
                 }`}
               >
-                <Plus className="h-5 w-5" />
-                <span className="font-medium">Generate Tests</span>
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300 ${
+                  activeTab === 'generate'
+                    ? 'bg-gradient-to-br from-primary-500 to-accent-500 shadow-glow'
+                    : 'bg-slate-100 group-hover:bg-gradient-to-br group-hover:from-primary-500 group-hover:to-accent-500'
+                }`}>
+                  <Plus className={`h-5 w-5 transition-colors duration-300 ${
+                    activeTab === 'generate' ? 'text-white' : 'text-slate-600 group-hover:text-white'
+                  }`} />
+                </div>
+                <span className="font-semibold">Generate Tests</span>
               </button>
             </li>
             <li>
               <button
                 onClick={() => setActiveTab('sitemap')}
-                className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                className={`w-full flex items-center space-x-4 px-4 py-3 rounded-xl text-left transition-all duration-300 group ${
                   activeTab === 'sitemap'
-                    ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                    : 'text-gray-700 hover:bg-gray-50'
+                    ? 'bg-gradient-to-r from-primary-500/10 to-accent-500/10 text-primary-700 border border-primary-200/50 shadow-glow'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
                 }`}
               >
-                <Map className="h-5 w-5" />
-                <span className="font-medium">Test Suites</span>
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300 ${
+                  activeTab === 'sitemap'
+                    ? 'bg-gradient-to-br from-primary-500 to-accent-500 shadow-glow'
+                    : 'bg-slate-100 group-hover:bg-gradient-to-br group-hover:from-primary-500 group-hover:to-accent-500'
+                }`}>
+                  <Map className={`h-5 w-5 transition-colors duration-300 ${
+                    activeTab === 'sitemap' ? 'text-white' : 'text-slate-600 group-hover:text-white'
+                  }`} />
+                </div>
+                <span className="font-semibold">Test Suites</span>
               </button>
             </li>
             <li>
               <button
                 onClick={() => setActiveTab('execute')}
-                className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                className={`w-full flex items-center space-x-4 px-4 py-3 rounded-xl text-left transition-all duration-300 group ${
                   activeTab === 'execute'
-                    ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                    : 'text-gray-700 hover:bg-gray-50'
+                    ? 'bg-gradient-to-r from-primary-500/10 to-accent-500/10 text-primary-700 border border-primary-200/50 shadow-glow'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
                 }`}
               >
-                <Play className="h-5 w-5" />
-                <span className="font-medium">Execute Tests</span>
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300 ${
+                  activeTab === 'execute'
+                    ? 'bg-gradient-to-br from-primary-500 to-accent-500 shadow-glow'
+                    : 'bg-slate-100 group-hover:bg-gradient-to-br group-hover:from-primary-500 group-hover:to-accent-500'
+                }`}>
+                  <Play className={`h-5 w-5 transition-colors duration-300 ${
+                    activeTab === 'execute' ? 'text-white' : 'text-slate-600 group-hover:text-white'
+                  }`} />
+                </div>
+                <span className="font-semibold">Execute Tests</span>
               </button>
             </li>
             <li>
               <button
                 onClick={() => setActiveTab('results')}
-                className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                className={`w-full flex items-center space-x-4 px-4 py-3 rounded-xl text-left transition-all duration-300 group ${
                   activeTab === 'results'
-                    ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                    : 'text-gray-700 hover:bg-gray-50'
+                    ? 'bg-gradient-to-r from-primary-500/10 to-accent-500/10 text-primary-700 border border-primary-200/50 shadow-glow'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
                 }`}
               >
-                <BarChart3 className="h-5 w-5" />
-                <span className="font-medium">Test Results</span>
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300 ${
+                  activeTab === 'results'
+                    ? 'bg-gradient-to-br from-primary-500 to-accent-500 shadow-glow'
+                    : 'bg-slate-100 group-hover:bg-gradient-to-br group-hover:from-primary-500 group-hover:to-accent-500'
+                }`}>
+                  <BarChart3 className={`h-5 w-5 transition-colors duration-300 ${
+                    activeTab === 'results' ? 'text-white' : 'text-slate-600 group-hover:text-white'
+                  }`} />
+                </div>
+                <span className="font-semibold">Test Results</span>
               </button>
             </li>
           </ul>
         </nav>
 
         {/* User Info */}
-        <div className="p-4 border-t border-gray-200">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-medium">U</span>
+        <div className="p-6 border-t border-white/30">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center shadow-glow">
+              <span className="text-white text-sm font-bold">U</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">User</p>
-              <p className="text-xs text-gray-500 truncate">user@example.com</p>
+              <p className="text-sm font-semibold text-slate-900 truncate">User</p>
+              <p className="text-xs text-slate-500 truncate">user@example.com</p>
             </div>
           </div>
         </div>
@@ -229,36 +262,44 @@ export default function AuthenticatedDashboard() {
         <div className="p-8">
           {/* Tab Content */}
           {activeTab === 'generate' && (
-            <TestGenerationTab
-              url={url}
-              testSuiteName={testSuiteName}
-              isGenerating={isGenerating}
-              result={result}
-              error={error}
-              onUrlChange={setUrl}
-              onTestSuiteNameChange={setTestSuiteName}
-              onGenerate={handleGenerateTests}
-            />
+            <div className="animate-fade-in">
+              <TestGenerationTab
+                url={url}
+                testSuiteName={testSuiteName}
+                isGenerating={isGenerating}
+                result={result}
+                error={error}
+                onUrlChange={setUrl}
+                onTestSuiteNameChange={setTestSuiteName}
+                onGenerate={handleGenerateTests}
+              />
+            </div>
           )}
 
           {activeTab === 'sitemap' && (
-            <TestSuiteTab />
+            <div className="animate-slide-up">
+              <TestSuiteTab />
+            </div>
           )}
 
           {activeTab === 'execute' && (
-            <TestExecutionDashboard 
-              testSuiteId={selectedTestSuiteId || generatedTestSuiteId || undefined}
-              onTestSuiteSelect={setSelectedTestSuiteId}
-            />
+            <div className="animate-slide-in-right">
+              <TestExecutionDashboard 
+                testSuiteId={selectedTestSuiteId || generatedTestSuiteId || undefined}
+                onTestSuiteSelect={setSelectedTestSuiteId}
+              />
+            </div>
           )}
 
           {activeTab === 'results' && (
-            <TestResultsSummary 
-              testSuiteId={selectedTestSuiteId || generatedTestSuiteId || undefined}
-              onViewDetails={(result) => {
-                console.log('View details for:', result);
-              }}
-            />
+            <div className="animate-fade-in">
+              <TestResultsSummary 
+                testSuiteId={selectedTestSuiteId || generatedTestSuiteId || undefined}
+                onViewDetails={(result) => {
+                  console.log('View details for:', result);
+                }}
+              />
+            </div>
           )}
         </div>
       </div>
