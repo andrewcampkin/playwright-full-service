@@ -7,6 +7,7 @@ import cors from 'cors';
 import { crawlAndGenerateTests } from './services/aiService.js';
 import { AuthService } from './services/authService.js';
 import { DatabaseService } from './services/database.js';
+import { TestImprovementService } from './services/testImprovementService.js';
 import prisma from './services/database.js';
 
 const app = express();
@@ -326,6 +327,304 @@ app.post('/api/crawl-and-generate', async (req, res) => {
       success: false,
       error: 'Internal server error',
       message: error.message || 'An unexpected error occurred during crawling and test generation'
+    });
+  }
+});
+
+// Test execution and improvement endpoints
+app.post('/api/protected/execute-test', async (req, res) => {
+  try {
+    const user = await AuthService.getCurrentUser(req);
+    const { testCaseId, priority = 'normal' } = req.body;
+    
+    if (!testCaseId) {
+      return res.status(400).json({
+        success: false,
+        error: 'testCaseId is required'
+      });
+    }
+
+    // Check if user has access to the test case
+    const hasAccess = await DatabaseService.checkUserAccess(user.id, 'testCase', testCaseId);
+    if (!hasAccess) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied to this test case'
+      });
+    }
+
+    console.log(`🚀 Queuing test execution for test case: ${testCaseId} by user: ${user.id}`);
+    
+    // Queue the test execution with the test runner service
+    const testRunnerUrl = process.env.TEST_RUNNER_URL || 'http://localhost:3002';
+    const response = await fetch(`${testRunnerUrl}/api/execute-test`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        testCaseId,
+        userId: user.id,
+        priority
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to queue test execution');
+    }
+
+    res.json({
+      success: true,
+      message: 'Test execution queued successfully',
+      ...result
+    });
+
+  } catch (error) {
+    console.error('Error queuing test execution:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+app.post('/api/protected/execute-test-suite', async (req, res) => {
+  try {
+    const user = await AuthService.getCurrentUser(req);
+    const { testSuiteId, priority = 'normal', parallel = false } = req.body;
+    
+    if (!testSuiteId) {
+      return res.status(400).json({
+        success: false,
+        error: 'testSuiteId is required'
+      });
+    }
+
+    // Check if user has access to the test suite
+    const hasAccess = await DatabaseService.checkUserAccess(user.id, 'testSuite', testSuiteId);
+    if (!hasAccess) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied to this test suite'
+      });
+    }
+
+    console.log(`🚀 Queuing test suite execution: ${testSuiteId} by user: ${user.id}`);
+    
+    // Queue the test suite execution with the test runner service
+    const testRunnerUrl = process.env.TEST_RUNNER_URL || 'http://localhost:3002';
+    const response = await fetch(`${testRunnerUrl}/api/execute-test-suite`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        testSuiteId,
+        userId: user.id,
+        priority,
+        parallel
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to queue test suite execution');
+    }
+
+    res.json({
+      success: true,
+      message: 'Test suite execution queued successfully',
+      ...result
+    });
+
+  } catch (error) {
+    console.error('Error queuing test suite execution:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// AI Test Improvement endpoints
+app.post('/api/protected/analyze-test', async (req, res) => {
+  try {
+    const user = await AuthService.getCurrentUser(req);
+    const { testCaseId, includeHistory = true } = req.body;
+    
+    if (!testCaseId) {
+      return res.status(400).json({
+        success: false,
+        error: 'testCaseId is required'
+      });
+    }
+
+    // Check if user has access to the test case
+    const hasAccess = await DatabaseService.checkUserAccess(user.id, 'testCase', testCaseId);
+    if (!hasAccess) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied to this test case'
+      });
+    }
+
+    console.log(`🧠 Analyzing test case: ${testCaseId} by user: ${user.id}`);
+    
+    // Get execution history if requested
+    let executionHistory = [];
+    if (includeHistory) {
+      executionHistory = await DatabaseService.getExecutionStats(testCaseId, 10);
+    }
+    
+    // Generate AI improvement suggestions
+    const analysis = await TestImprovementService.analyzeTestExecution(testCaseId, executionHistory);
+    
+    res.json({
+      success: true,
+      message: 'Test analysis completed',
+      analysis
+    });
+
+  } catch (error) {
+    console.error('Error analyzing test:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+app.post('/api/protected/analyze-test-suite', async (req, res) => {
+  try {
+    const user = await AuthService.getCurrentUser(req);
+    const { testSuiteId } = req.body;
+    
+    if (!testSuiteId) {
+      return res.status(400).json({
+        success: false,
+        error: 'testSuiteId is required'
+      });
+    }
+
+    // Check if user has access to the test suite
+    const hasAccess = await DatabaseService.checkUserAccess(user.id, 'testSuite', testSuiteId);
+    if (!hasAccess) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied to this test suite'
+      });
+    }
+
+    console.log(`🧠 Analyzing test suite: ${testSuiteId} by user: ${user.id}`);
+    
+    // Generate AI test suite analysis
+    const analysis = await TestImprovementService.analyzeTestSuite(testSuiteId);
+    
+    res.json({
+      success: true,
+      message: 'Test suite analysis completed',
+      analysis
+    });
+
+  } catch (error) {
+    console.error('Error analyzing test suite:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get test executions
+app.get('/api/protected/executions', async (req, res) => {
+  try {
+    const user = await AuthService.getCurrentUser(req);
+    const { testSuiteId, testCaseId } = req.query;
+    
+    let executions;
+    if (testCaseId) {
+      executions = await DatabaseService.getExecutionsByTestCase(testCaseId, user.id);
+    } else if (testSuiteId) {
+      executions = await DatabaseService.getExecutionsByTestSuite(testSuiteId, user.id);
+    } else {
+      executions = await DatabaseService.getExecutionsByUser(user.id);
+    }
+    
+    res.json({
+      success: true,
+      data: executions
+    });
+  } catch (error) {
+    console.error('Error fetching executions:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get execution statistics
+app.get('/api/protected/execution-stats', async (req, res) => {
+  try {
+    const user = await AuthService.getCurrentUser(req);
+    const { testSuiteId, testCaseId } = req.query;
+    
+    const stats = await DatabaseService.getExecutionStats(testSuiteId, testCaseId, user.id);
+    
+    res.json({
+      success: true,
+      data: stats
+    });
+  } catch (error) {
+    console.error('Error fetching execution stats:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get test results
+app.get('/api/protected/test-results', async (req, res) => {
+  try {
+    const user = await AuthService.getCurrentUser(req);
+    const { testSuiteId, period } = req.query;
+    
+    const results = await DatabaseService.getTestResults(testSuiteId, period, user.id);
+    
+    res.json({
+      success: true,
+      data: results
+    });
+  } catch (error) {
+    console.error('Error fetching test results:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get test trends
+app.get('/api/protected/test-trends', async (req, res) => {
+  try {
+    const user = await AuthService.getCurrentUser(req);
+    const { testSuiteId, period } = req.query;
+    
+    const trends = await DatabaseService.getTestTrends(testSuiteId, period, user.id);
+    
+    res.json({
+      success: true,
+      data: trends
+    });
+  } catch (error) {
+    console.error('Error fetching test trends:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
     });
   }
 });

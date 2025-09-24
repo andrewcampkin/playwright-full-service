@@ -1,0 +1,36 @@
+FROM node:18-alpine
+
+# Install system dependencies
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
+
+# Tell Playwright to use the installed Chromium
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+WORKDIR /app
+
+# Copy package files
+COPY test-runner/package.json test-runner/yarn.lock ./
+
+# Install dependencies
+RUN yarn install --frozen-lockfile
+
+# Copy source code
+COPY test-runner/src ./src
+
+# Copy Prisma schema from backend-node (shared database schema)
+COPY backend-node/prisma/schema.prisma ./prisma/schema.prisma
+
+# Generate Prisma client
+RUN npx prisma generate
+
+EXPOSE 3002 3003
+
+CMD ["yarn", "dev"]

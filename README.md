@@ -70,18 +70,32 @@ docker-compose --profile tools up -d
 
 ## Architecture
 
-### Backend (Node.js + Express + Prisma)
-- **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: JWT with bcrypt password hashing
-- **AI Integration**: OpenAI function calling with Playwright MCP tools
-- **Real crawling**: AI actually navigates and explores websites
-- **Test generation**: Creates comprehensive Playwright test cases
-- **Data persistence**: Stores users, projects, websites, and test results
+### Service Responsibilities
 
-### Frontend (React + TypeScript + Vite)
-- **Simple UI**: URL input and results display
-- **Real-time updates**: Shows crawling progress
-- **Results visualization**: Sitemap and test cases display
+**Backend-Node Service** (Database Owner):
+- **Single source of truth** for database schema (Prisma)
+- **Database management**: Migrations, seeding, and schema changes
+- **API endpoints**: CRUD operations for all entities
+- **AI Integration**: OpenAI function calling with Playwright MCP tools
+- **Authentication**: JWT with bcrypt password hashing
+
+**Test-Runner Service** (Database Consumer):
+- **Test execution**: Runs Playwright tests from queue
+- **Database access**: Uses shared schema, no schema management
+- **Job processing**: Redis-based queue system
+- **Real-time updates**: WebSocket for execution status
+
+**Frontend** (React + TypeScript + Vite):
+- **Test generation**: URL input and AI crawling
+- **Test execution**: Dashboard with real-time monitoring
+- **Results analytics**: Comprehensive test results and trends
+- **Three-tab interface**: Generate → Execute → Results
+
+### Database Architecture
+- **PostgreSQL**: Central database shared by all services
+- **Backend-Node**: Manages schema, migrations, and seeding
+- **Test-Runner**: Consumes database using generated Prisma client
+- **Redis**: Job queue for test execution
 
 ## How It Works
 

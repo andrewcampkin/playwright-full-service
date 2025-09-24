@@ -46,7 +46,7 @@ services:
     networks:
       - playwright-network
     restart: unless-stopped
-    command: sh -c "yarn db:push --accept-data-loss && yarn dev"
+    command: sh -c "yarn db:push --accept-data-loss && yarn db:seed && yarn dev"
 
   # Frontend (React + Vite)
   frontend:
@@ -69,6 +69,58 @@ services:
     restart: unless-stopped
     command: yarn dev --host 0.0.0.0
 
+  # Redis for Job Queue
+  redis:
+    image: redis:7-alpine
+    container_name: playwright-service-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - playwright-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Test Runner Service
+  test-runner:
+    build:
+      context: .
+      dockerfile: test-runner/Dockerfile.dev
+    container_name: playwright-service-test-runner
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=development
+      - PORT=3002
+      - WEBSOCKET_PORT=3003
+      - DATABASE_URL=postgresql://playwright_user:playwright_password@postgres:5432/playwrightservice
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - API_URL=http://backend-node:3001
+      - FRONTEND_URL=http://localhost:3000
+      - PRISMA_QUERY_ENGINE_LIBRARY=/app/node_modules/.prisma/client/libquery_engine-linux-musl-openssl-3.0.x.so.node
+    ports:
+      - "3002:3002"
+      - "3003:3003"
+    volumes:
+      - ./test-runner:/app
+      - /app/node_modules
+      - /tmp:/tmp
+    depends_on:
+      backend-node:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    networks:
+      - playwright-network
+    restart: unless-stopped
+    command: sh -c "yarn db:generate && yarn dev"
+
   # pgAdmin for Database Management (Optional)
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -90,6 +142,7 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
   pgadmin_data:
 
 networks:

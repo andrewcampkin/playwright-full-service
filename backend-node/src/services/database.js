@@ -312,6 +312,80 @@ export class DatabaseService {
     });
   }
 
+  // Execution analytics operations
+  static async getExecutionStats(testCaseId, limit = 10) {
+    return await prisma.testExecution.findMany({
+      where: { testCaseId },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      select: {
+        id: true,
+        status: true,
+        startTime: true,
+        endTime: true,
+        errorMessage: true,
+        createdAt: true,
+      },
+    });
+  }
+
+  static async getTestSuiteTestCases(testSuiteId) {
+    return await prisma.testCase.findMany({
+      where: { 
+        testSuiteId,
+        isActive: true,
+      },
+      include: {
+        testSuite: {
+          include: {
+            website: {
+              include: {
+                project: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
+  static async getExecutionById(executionId) {
+    return await prisma.testExecution.findUnique({
+      where: { id: executionId },
+      include: {
+        testCase: {
+          include: {
+            testSuite: {
+              include: {
+                website: {
+                  include: {
+                    project: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        user: true,
+      },
+    });
+  }
+
+  static async getLatestExecutionForTestCase(testCaseId) {
+    return await prisma.testExecution.findFirst({
+      where: { 
+        testCaseId,
+        status: 'Running'
+      },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        testCase: true,
+        user: true,
+      },
+    });
+  }
+
   // Utility operations
   static async checkUserAccess(userId, resourceType, resourceId) {
     switch (resourceType) {
