@@ -1,5 +1,7 @@
 # AI Test Improvement System
 
+> **Advanced AI-powered test analysis and improvement suggestions for the Playwright AI Service platform.**
+
 ## 🎯 **Overview**
 
 The AI Test Improvement system analyzes test execution results and provides intelligent suggestions for improving test reliability, performance, and coverage. This system is integrated into the main backend service and works seamlessly with the test runner service.

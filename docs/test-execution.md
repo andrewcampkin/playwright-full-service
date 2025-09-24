@@ -1,5 +1,7 @@
 # Test Execution & Results Frontend
 
+> **Comprehensive guide to the test execution dashboard and analytics features of the Playwright AI Service platform.**
+
 ## 🎯 **Overview**
 
 The frontend now includes comprehensive test execution and results management capabilities with three main sections:

@@ -1,5 +1,18 @@
 # Database Setup Guide
 
+> **Complete guide for setting up the PostgreSQL database with Prisma ORM for the Playwright AI Service platform.**
+
+## 📋 Navigation
+- [Quick Start](#-quick-start)
+- [What's Been Added](#-whats-been-added)
+- [Database Commands](#-database-commands)
+- [Database Schema](#️-database-schema)
+- [Authentication](#-authentication)
+- [Demo Account](#-demo-account)
+- [Migration from .NET](#-migration-from-net)
+- [Next Steps](#-next-steps)
+- [Troubleshooting](#-troubleshooting)
+
 ## 🚀 Quick Start
 
 ### 1. Install Dependencies
