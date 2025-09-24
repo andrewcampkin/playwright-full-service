@@ -191,98 +191,7 @@ app.post('/api/protected/websites', async (req, res) => {
   }
 });
 
-// Main endpoint: Crawl website and generate tests (now with database persistence)
-app.post('/api/protected/crawl-and-generate', async (req, res) => {
-  try {
-    const user = await AuthService.getCurrentUser(req);
-    const { url, websiteId, projectId } = req.body;
-    
-    if (!url) {
-      return res.status(400).json({ 
-        success: false,
-        error: 'URL is required',
-        message: 'Please provide a valid URL to crawl and generate tests for'
-      });
-    }
-
-    // Validate URL format
-    try {
-      new URL(url);
-    } catch (error) {
-      return res.status(400).json({ 
-        success: false,
-        error: 'Invalid URL format',
-        message: 'Please provide a valid URL (e.g., https://example.com)'
-      });
-    }
-
-    console.log(`Starting AI crawl and test generation for: ${url} by user: ${user.id}`);
-    
-    // Use AI service to crawl website and generate tests
-    const result = await crawlAndGenerateTests(url);
-    
-    // If websiteId is provided, save the results to database
-    if (websiteId) {
-      // Check if user has access to the website
-      const hasAccess = await DatabaseService.checkUserAccess(user.id, 'website', websiteId);
-      if (!hasAccess) {
-        return res.status(403).json({
-          success: false,
-          error: 'Access denied to this website'
-        });
-      }
-
-      // Save exploration results
-      await DatabaseService.createExplorationResult({
-        websiteId,
-        url,
-        sitemap: JSON.stringify(result.sitemap),
-        tests: JSON.stringify(result.tests),
-        explorationData: JSON.stringify(result.explorationData),
-        rawResponse: result.rawResponse,
-      });
-
-      // Create test suite and test cases
-      if (result.tests && result.tests.length > 0) {
-        const testSuite = await DatabaseService.createTestSuite({
-          name: `AI Generated Tests - ${new URL(url).hostname}`,
-          description: `Automatically generated test cases for ${url}`,
-          websiteId,
-        });
-
-        // Create test cases
-        for (const test of result.tests) {
-          await DatabaseService.createTestCase({
-            name: test.name,
-            description: test.description,
-            steps: JSON.stringify(test.steps),
-            testSuiteId: testSuite.id,
-          });
-        }
-      }
-    }
-    
-    console.log(`Completed AI crawl and test generation for: ${url}`);
-    
-    res.json({
-      success: true,
-      url: url,
-      timestamp: new Date().toISOString(),
-      ...result
-    });
-
-  } catch (error) {
-    console.error('Error in crawl-and-generate endpoint:', error);
-    
-    res.status(500).json({
-      success: false,
-      error: 'Internal server error',
-      message: error.message || 'An unexpected error occurred during crawling and test generation'
-    });
-  }
-});
-
-// Legacy endpoint for backward compatibility (without authentication)
+// Public endpoint: Crawl website and generate tests (no authentication required)
 app.post('/api/crawl-and-generate', async (req, res) => {
   try {
     const { url } = req.body;
@@ -306,10 +215,121 @@ app.post('/api/crawl-and-generate', async (req, res) => {
       });
     }
 
-    console.log(`Starting AI crawl and test generation for: ${url} (legacy endpoint)`);
+    console.log(`Starting public AI crawl and test generation for: ${url}`);
     
     // Use AI service to crawl website and generate tests
     const result = await crawlAndGenerateTests(url);
+    
+    console.log(`Completed public AI crawl and test generation for: ${url}`);
+    
+    res.json({
+      success: true,
+      url: url,
+      timestamp: new Date().toISOString(),
+      ...result
+    });
+
+  } catch (error) {
+    console.error('Error in public crawl-and-generate endpoint:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      message: 'Failed to generate tests. Please try again.'
+    });
+  }
+});
+
+// Main endpoint: Crawl website and generate tests (now with database persistence)
+app.post('/api/protected/crawl-and-generate', async (req, res) => {
+  try {
+    const user = await AuthService.getCurrentUser(req);
+    const { url, websiteId, projectId, testSuiteName } = req.body;
+    
+    if (!url) {
+      return res.status(400).json({ 
+        success: false,
+        error: 'URL is required',
+        message: 'Please provide a valid URL to crawl and generate tests for'
+      });
+    }
+
+    // Validate URL format
+    try {
+      new URL(url);
+    } catch (error) {
+      return res.status(400).json({ 
+        success: false,
+        error: 'Invalid URL format',
+        message: 'Please provide a valid URL (e.g., https://example.com)'
+      });
+    }
+
+    console.log(`Starting AI crawl and test generation for: ${url} by user: ${user.id}`);
+    
+    // Use AI service to crawl website and generate tests
+    let result;
+    if (req.body.generatedTests) {
+      // Use pre-generated tests from signup flow
+      result = {
+        success: true,
+        url: url,
+        timestamp: new Date().toISOString(),
+        sitemap: req.body.sitemap || [],
+        tests: req.body.generatedTests,
+        explorationLog: req.body.explorationLog || 0
+      };
+    } else {
+      result = await crawlAndGenerateTests(url);
+    }
+    
+    // If websiteId is provided, save the results to database
+    if (websiteId) {
+      // Check if user has access to the website
+      const hasAccess = await DatabaseService.checkUserAccess(user.id, 'website', websiteId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          success: false,
+          error: 'Access denied to this website'
+        });
+      }
+
+      // Save exploration results
+      await DatabaseService.createExplorationResult({
+        websiteId,
+        url,
+        sitemap: JSON.stringify(result.sitemap),
+        tests: JSON.stringify(result.tests),
+        explorationData: JSON.stringify(result.explorationData),
+        rawResponse: result.rawResponse,
+      });
+
+      // Create test suite and test cases
+      let testSuiteId = null;
+      if (result.tests && result.tests.length > 0) {
+        // Use provided testSuiteName or generate a fallback name
+        const suiteName = testSuiteName && testSuiteName.trim() 
+          ? testSuiteName.trim()
+          : `AI Generated Tests - ${new URL(url).hostname}`;
+          
+        const testSuite = await DatabaseService.createTestSuite({
+          name: suiteName,
+          description: `Automatically generated test cases for ${url}`,
+          websiteId,
+        });
+
+        testSuiteId = testSuite.id;
+
+        // Create test cases
+        for (const test of result.tests) {
+          await DatabaseService.createTestCase({
+            name: test.name,
+            description: test.description,
+            steps: JSON.stringify(test.steps),
+            testSuiteId: testSuite.id,
+          });
+        }
+      }
+    }
     
     console.log(`Completed AI crawl and test generation for: ${url}`);
     
@@ -317,6 +337,7 @@ app.post('/api/crawl-and-generate', async (req, res) => {
       success: true,
       url: url,
       timestamp: new Date().toISOString(),
+      testSuiteId: testSuiteId,
       ...result
     });
 
@@ -330,6 +351,7 @@ app.post('/api/crawl-and-generate', async (req, res) => {
     });
   }
 });
+
 
 // Test execution and improvement endpoints
 app.post('/api/protected/execute-test', async (req, res) => {
@@ -531,6 +553,78 @@ app.post('/api/protected/analyze-test-suite', async (req, res) => {
 
   } catch (error) {
     console.error('Error analyzing test suite:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get test suites for a user
+app.get('/api/protected/test-suites', async (req, res) => {
+  try {
+    const user = await AuthService.getCurrentUser(req);
+    const { websiteId } = req.query;
+    
+    let testSuites;
+    if (websiteId) {
+      // Check if user has access to the website
+      const hasAccess = await DatabaseService.checkUserAccess(user.id, 'website', websiteId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          success: false,
+          error: 'Access denied to this website'
+        });
+      }
+      
+      testSuites = await DatabaseService.getTestSuitesByWebsite(websiteId);
+    } else {
+      testSuites = await DatabaseService.getTestSuitesByUser(user.id);
+    }
+    
+    res.json({
+      success: true,
+      data: testSuites
+    });
+  } catch (error) {
+    console.error('Error fetching test suites:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get test cases for a test suite
+app.get('/api/protected/test-cases', async (req, res) => {
+  try {
+    const user = await AuthService.getCurrentUser(req);
+    const { testSuiteId } = req.query;
+    
+    if (!testSuiteId) {
+      return res.status(400).json({
+        success: false,
+        error: 'testSuiteId is required'
+      });
+    }
+
+    // Check if user has access to the test suite
+    const hasAccess = await DatabaseService.checkUserAccess(user.id, 'testSuite', testSuiteId);
+    if (!hasAccess) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied to this test suite'
+      });
+    }
+    
+    const testCases = await DatabaseService.getTestSuiteTestCases(testSuiteId);
+    
+    res.json({
+      success: true,
+      data: testCases
+    });
+  } catch (error) {
+    console.error('Error fetching test cases:', error);
     res.status(500).json({
       success: false,
       error: error.message

@@ -1,6 +1,12 @@
-import { Zap, Github } from 'lucide-react';
+import { Zap, User, LogOut } from 'lucide-react';
+import { useAuth } from '../contexts/useAuth';
 
-export default function Header() {
+interface HeaderProps {
+  onLoginClick?: () => void;
+}
+
+export default function Header({ onLoginClick }: HeaderProps) {
+  const { user, logout, isAuthenticated } = useAuth();
   return (
     <header className="bg-white border-b border-gray-200">
       <div className="max-w-6xl mx-auto px-4">
@@ -31,13 +37,33 @@ export default function Header() {
 
           {/* Actions */}
           <div className="flex items-center space-x-3">
-            <button className="hidden sm:flex items-center space-x-2 text-gray-600 hover:text-gray-900">
-              <Github className="h-4 w-4" />
-              <span>GitHub</span>
-            </button>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded font-medium hover:bg-blue-700">
-              Get Started
-            </button>
+            {isAuthenticated ? (
+              <>
+                <div className="flex items-center space-x-2 text-gray-600">
+                  <User className="h-4 w-4" />
+                  <span className="hidden sm:inline">{user?.name || user?.email}</span>
+                </div>
+                <button
+                  onClick={logout}
+                  className="flex items-center space-x-2 text-gray-600 hover:text-gray-900"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className="hidden sm:inline">Logout</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <button 
+                  onClick={onLoginClick}
+                  className="text-gray-600 hover:text-gray-900 font-medium"
+                >
+                  Sign In
+                </button>
+                <button className="bg-blue-600 text-white px-4 py-2 rounded font-medium hover:bg-blue-700">
+                  Get Started
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
