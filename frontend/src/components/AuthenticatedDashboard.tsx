@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Plus, Play, BarChart3 } from 'lucide-react';
-import TabNavigation from './TabNavigation';
+import { Plus, Play, BarChart3, Map } from 'lucide-react';
 import TestGenerationTab from './TestGenerationTab';
+import TestSuiteTab from './TestSuiteTab';
 import TestExecutionDashboard from './TestExecutionDashboard';
 import TestResultsSummary from './TestResultsSummary';
 
@@ -37,7 +37,7 @@ export default function AuthenticatedDashboard() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [result, setResult] = useState<CrawlResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'generate' | 'execute' | 'results'>('generate');
+  const [activeTab, setActiveTab] = useState<'generate' | 'sitemap' | 'execute' | 'results'>('generate');
   const [generatedTestSuiteId, setGeneratedTestSuiteId] = useState<string | null>(null);
   const [selectedTestSuiteId, setSelectedTestSuiteId] = useState<string | null>(null);
 
@@ -149,72 +149,118 @@ export default function AuthenticatedDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Welcome Section */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Welcome to Playwright AI</h1>
-              <p className="text-gray-600 mt-1">Generate, execute, and manage your automated tests</p>
-            </div>
-            <div className="flex space-x-3">
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar Navigation */}
+      <div className="w-64 bg-white shadow-sm border-r border-gray-200 flex flex-col pt-4">
+        {/* Navigation Menu */}
+        <nav className="flex-1 p-4">
+          <ul className="space-y-2">
+            <li>
               <button
                 onClick={() => setActiveTab('generate')}
-                className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                  activeTab === 'generate'
+                    ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
               >
-                <Plus className="h-4 w-4" />
-                <span>New Test Suite</span>
+                <Plus className="h-5 w-5" />
+                <span className="font-medium">Generate Tests</span>
               </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setActiveTab('sitemap')}
+                className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                  activeTab === 'sitemap'
+                    ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <Map className="h-5 w-5" />
+                <span className="font-medium">Test Suites</span>
+              </button>
+            </li>
+            <li>
               <button
                 onClick={() => setActiveTab('execute')}
-                className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                  activeTab === 'execute'
+                    ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
               >
-                <Play className="h-4 w-4" />
-                <span>Run Tests</span>
+                <Play className="h-5 w-5" />
+                <span className="font-medium">Execute Tests</span>
               </button>
+            </li>
+            <li>
               <button
                 onClick={() => setActiveTab('results')}
-                className="flex items-center space-x-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
+                className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                  activeTab === 'results'
+                    ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
               >
-                <BarChart3 className="h-4 w-4" />
-                <span>View Results</span>
+                <BarChart3 className="h-5 w-5" />
+                <span className="font-medium">Test Results</span>
               </button>
+            </li>
+          </ul>
+        </nav>
+
+        {/* User Info */}
+        <div className="p-4 border-t border-gray-200">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+              <span className="text-white text-sm font-medium">U</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 truncate">User</p>
+              <p className="text-xs text-gray-500 truncate">user@example.com</p>
             </div>
           </div>
         </div>
+      </div>
 
-        <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+      {/* Main Content */}
+      <div className="flex-1 overflow-auto">
+        <div className="p-8">
+          {/* Tab Content */}
+          {activeTab === 'generate' && (
+            <TestGenerationTab
+              url={url}
+              testSuiteName={testSuiteName}
+              isGenerating={isGenerating}
+              result={result}
+              error={error}
+              onUrlChange={setUrl}
+              onTestSuiteNameChange={setTestSuiteName}
+              onGenerate={handleGenerateTests}
+            />
+          )}
 
-        {/* Tab Content */}
-        {activeTab === 'generate' && (
-          <TestGenerationTab
-            url={url}
-            testSuiteName={testSuiteName}
-            isGenerating={isGenerating}
-            result={result}
-            error={error}
-            onUrlChange={setUrl}
-            onTestSuiteNameChange={setTestSuiteName}
-            onGenerate={handleGenerateTests}
-          />
-        )}
+          {activeTab === 'sitemap' && (
+            <TestSuiteTab />
+          )}
 
-        {activeTab === 'execute' && (
-          <TestExecutionDashboard 
-            testSuiteId={selectedTestSuiteId || generatedTestSuiteId || undefined}
-            onTestSuiteSelect={setSelectedTestSuiteId}
-          />
-        )}
+          {activeTab === 'execute' && (
+            <TestExecutionDashboard 
+              testSuiteId={selectedTestSuiteId || generatedTestSuiteId || undefined}
+              onTestSuiteSelect={setSelectedTestSuiteId}
+            />
+          )}
 
-        {activeTab === 'results' && (
-          <TestResultsSummary 
-            testSuiteId={selectedTestSuiteId || generatedTestSuiteId || undefined}
-            onViewDetails={(result) => {
-              console.log('View details for:', result);
-            }}
-          />
-        )}
+          {activeTab === 'results' && (
+            <TestResultsSummary 
+              testSuiteId={selectedTestSuiteId || generatedTestSuiteId || undefined}
+              onViewDetails={(result) => {
+                console.log('View details for:', result);
+              }}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

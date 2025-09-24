@@ -19,11 +19,24 @@
 - ✅ User authentication and authorization
 - ✅ Project and website management
 - ✅ Token-efficient data processing
+- ✅ **Site Map Generation System** (NEW)
+  - ✅ Website crawling with configurable depth and page limits
+  - ✅ Secure secrets management for login credentials
+  - ✅ Manual page addition for unlinked pages
+  - ✅ Input field detection and form analysis
+  - ✅ Iterative crawling with secret application
 
 ### 🚧 **Frontend (PARTIAL)**
 - ✅ Basic React + TypeScript + Vite setup
 - ✅ Tailwind CSS styling
 - ✅ Simple test generation interface
+- ✅ **Site Map Management UI** (NEW)
+  - ✅ Project and website selection
+  - ✅ Site map creation and management
+  - ✅ Crawl configuration and execution
+  - ✅ Secrets management interface
+  - ✅ Manual page addition
+  - ✅ Page listing and visualization
 - ❌ **Authentication integration** (still uses legacy endpoint)
 - ❌ **Project management UI** (no interface for managing projects)
 - ❌ **User dashboard** (no user context or navigation)

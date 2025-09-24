@@ -22,19 +22,6 @@ export default function Header({ onLoginClick }: HeaderProps) {
             </div>
           </div>
 
-          {/* Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
-            <a href="#features" className="text-gray-600 hover:text-gray-900">
-              Features
-            </a>
-            <a href="#pricing" className="text-gray-600 hover:text-gray-900">
-              Pricing
-            </a>
-            <a href="#docs" className="text-gray-600 hover:text-gray-900">
-              Documentation
-            </a>
-          </nav>
-
           {/* Actions */}
           <div className="flex items-center space-x-3">
             {isAuthenticated ? (

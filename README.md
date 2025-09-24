@@ -70,17 +70,46 @@ Edit `.env` and add your credentials:
 OPENAI_API_KEY=your_openai_api_key_here
 JWT_SECRET=your_jwt_secret_here
 
-# Database (auto-configured in Docker)
+# Database (auto-configured in Docker so not needed unless you want to setup local without docker)
 DATABASE_URL=postgresql://playwright_user:playwright_password@localhost:5432/playwrightservice
 ```
 
-### **3. Start Services**
+### **3. Local with docker**
+
+#### Install packages
+```bash
+# Backend
+cd backend-node
+yarn
+
+# Frontend
+cd frontend
+yarn
+
+# Test runner service
+cd test-runner
+yarn
+```
+
+#### Running
 ```bash
 # Start all services with Docker
 docker-compose up -d
 
+# Start all services with Docker including rebuilding
+docker-compose up --build -d
+
 # Or for development with tools
 docker-compose --profile tools up -d
+
+# View logs
+docker-compose logs -f
+
+# Restart a service
+docker-compose restart backend-node
+
+# Stop all services
+docker-compose down
 ```
 
 ### **4. Access the Platform**
@@ -145,22 +174,10 @@ playwright-full-service/
 
 ## 🔧 **Development**
 
-### **Docker Development (Recommended)**
-```bash
-# Start all services
-docker-compose up -d
+### **Local Development without docker**
 
-# View logs
-docker-compose logs -f
+Install the playwright browsers in the backend and the test runner if you are not running it in docker
 
-# Restart a service
-docker-compose restart backend-node
-
-# Stop all services
-docker-compose down
-```
-
-### **Local Development**
 ```bash
 # Backend only
 cd backend-node

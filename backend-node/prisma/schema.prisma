@@ -23,57 +23,29 @@ model User {
   updatedAt   DateTime @updatedAt
 
   // Relations
-  projects    Project[]
+  testSuites     TestSuite[]
   testExecutions TestExecution[]
 
   @@map("users")
 }
 
-model Project {
+
+model TestSuite {
   id          String   @id @default(uuid())
   name        String   @db.VarChar(200)
   description String?  @db.VarChar(1000)
+  baseUrl     String   @db.VarChar(500)
   userId      String
+  sitemap     String?  // JSON serialized sitemap data (pages, blockedPages, inputFields)
+  status      String   @default("draft") // "draft", "sitemap_complete", "tests_generated", "archived"
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relations
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  websites   Website[]
-
-  @@map("projects")
-}
-
-model Website {
-  id          String   @id @default(uuid())
-  name        String   @db.VarChar(200)
-  url         String   @db.VarChar(500)
-  description String?  @db.VarChar(1000)
-  projectId   String
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  project    Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  testSuites TestSuite[]
-
-  @@map("websites")
-}
-
-model TestSuite {
-  id          String   @id @default(uuid())
-  name        String   @db.VarChar(200)
-  description String?  @db.VarChar(1000)
-  websiteId   String
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  website    Website     @relation(fields: [websiteId], references: [id], onDelete: Cascade)
   testCases  TestCase[]
+  secrets    Secret[]
 
   @@map("test_suites")
 }
@@ -130,4 +102,24 @@ model ExplorationResult {
   updatedAt     DateTime @updatedAt
 
   @@map("exploration_results")
+}
+
+
+// Secret - Store encrypted secrets for form inputs and authentication
+model Secret {
+  id          String   @id @default(uuid())
+  testSuiteId String
+  name        String   @db.VarChar(200) // User-friendly name for the secret
+  key         String   @db.VarChar(200) // The form field name or identifier
+  value       String   // Encrypted value
+  type        String   @default("text") // "text", "password", "email", "url"
+  description String?  @db.VarChar(500)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  testSuite TestSuite @relation(fields: [testSuiteId], references: [id], onDelete: Cascade)
+
+  @@map("secrets")
 }
